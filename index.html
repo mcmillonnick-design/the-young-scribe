@@ -1,0 +1,1216 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The Young Scribe</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Crimson+Pro:wght@400;600;700&family=Courier+Prime:wght@400;700&display=swap">
+<style>
+  :root{
+    --ink:#2A2118; --paper:#F3EDDD; --surface:#FBF7EA; --surface-2:#E9DFC2;
+    --accent:#B8860B; --accent-ink:#6E520D; --good:#2F6B4F; --bad:#8B2E2E; --gold:#B8860B;
+    --muted:#7A6F5C; --border:#D8CBA8; --caret:#2A2118;
+    --f-lp:#C0392B; --f-lr:#A67C1E; --f-lm:#2F8F6B; --f-li:#2E5C9A; --f-ri:#6B3FA0; --f-rm:#B5456B; --f-rr:#8A5A34; --f-rp:#3E7C82; --f-th:#8C8270;
+    color-scheme: light dark;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --ink:#EDE3C8; --paper:#1B1611; --surface:#241E17; --surface-2:#2E2619;
+      --accent:#E0B84D; --accent-ink:#8A6A1E; --good:#4FAE86; --bad:#D96A5F; --gold:#E0B84D;
+      --muted:#B2A488; --border:#3B3222; --caret:#EDE3C8;
+      --f-lp:#E0685A; --f-lr:#D9A83D; --f-lm:#4FAE86; --f-li:#5C8AD1; --f-ri:#9B72D6; --f-rm:#D9739A; --f-rr:#B98858; --f-rp:#5FA1A8; --f-th:#A79C86;
+    }
+  }
+  :root[data-theme="dark"]{
+    --ink:#EDE3C8; --paper:#1B1611; --surface:#241E17; --surface-2:#2E2619;
+    --accent:#E0B84D; --accent-ink:#8A6A1E; --good:#4FAE86; --bad:#D96A5F; --gold:#E0B84D;
+    --muted:#B2A488; --border:#3B3222; --caret:#EDE3C8;
+    --f-lp:#E0685A; --f-lr:#D9A83D; --f-lm:#4FAE86; --f-li:#5C8AD1; --f-ri:#9B72D6; --f-rm:#D9739A; --f-rr:#B98858; --f-rp:#5FA1A8; --f-th:#A79C86;
+  }
+  *{box-sizing:border-box;}
+  html,body{ height:100%; }
+  body{
+    margin:0; background:var(--paper); color:var(--ink); font-family:'Crimson Pro',Georgia,serif;
+    background-image:
+      radial-gradient(ellipse at top left, color-mix(in srgb, var(--ink) 4%, transparent), transparent 55%),
+      radial-gradient(ellipse at bottom right, color-mix(in srgb, var(--ink) 4%, transparent), transparent 55%);
+  }
+  h1,h2,h3{ font-family:'Cormorant Garamond',Georgia,serif; text-wrap:balance; margin:0; font-weight:700; }
+  .mono{ font-family:'Courier Prime',ui-monospace,Consolas,monospace; }
+  button{ font-family:inherit; }
+  a{ color:var(--accent-ink); }
+
+  .app{ max-width:1000px; margin:0 auto; padding:20px 16px 48px; display:flex; flex-direction:column; gap:20px; }
+
+  .topbar{ display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap; padding-bottom:14px; border-bottom:2px solid var(--border); background-image:repeating-linear-gradient(90deg, var(--gold) 0 6px, transparent 6px 14px); background-position:bottom; background-repeat:repeat-x; background-size:14px 2px; }
+  .brand{ display:flex; align-items:baseline; gap:10px; }
+  .brand-mark{ font-size:26px; }
+  .brand-name{ font-family:'Cormorant Garamond',serif; font-weight:700; font-size:26px; letter-spacing:.2px; }
+  .brand-name .drop{ font-size:1.5em; color:var(--gold); font-weight:700; }
+  .nav-actions{ display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
+  .player-badge{ display:flex; align-items:center; gap:10px; background:var(--surface); border:1px solid var(--border); border-radius:999px; padding:6px 8px 6px 6px; }
+  .avatar{ width:36px; height:36px; border-radius:50%; background:var(--surface-2); display:flex; align-items:center; justify-content:center; font-size:19px; flex:none; }
+  .player-info{ display:flex; flex-direction:column; line-height:1.15; }
+  .player-name{ font-weight:700; font-size:14px; font-family:'Crimson Pro',serif; }
+  .player-stars{ font-size:12px; color:var(--muted); font-family:'Courier Prime',monospace; }
+
+  .ghost-btn{ background:transparent; border:1px solid var(--border); color:var(--ink); border-radius:999px; padding:8px 14px; font-weight:700; font-size:13px; cursor:pointer; font-family:'Crimson Pro',serif; }
+  .ghost-btn:hover{ border-color:var(--accent); color:var(--accent-ink); }
+
+  .keycap{ background:var(--surface); border:1px solid var(--border); border-radius:10px; box-shadow:0 3px 0 var(--border); cursor:pointer; transition:transform .08s ease, box-shadow .08s ease; }
+  .keycap:active{ transform:translateY(3px); box-shadow:0 0 0 var(--border); }
+  .keycap:focus-visible{ outline:3px solid var(--accent); outline-offset:2px; }
+
+  .btn-primary{ font-family:'Cormorant Garamond',serif; font-weight:700; font-size:18px; color:#fff; background:var(--accent); border:none; border-radius:10px; padding:13px 26px; box-shadow:0 4px 0 var(--accent-ink); cursor:pointer; transition:transform .08s ease, box-shadow .08s ease; }
+  .btn-primary:active{ transform:translateY(4px); box-shadow:0 0 0 var(--accent-ink); }
+  .btn-primary:disabled{ opacity:.4; cursor:not-allowed; box-shadow:0 4px 0 var(--border); }
+  .btn-secondary{ font-family:'Cormorant Garamond',serif; font-weight:700; font-size:17px; color:var(--ink); background:var(--surface); border:1px solid var(--border); border-radius:10px; padding:12px 22px; box-shadow:0 3px 0 var(--border); cursor:pointer; }
+  .btn-secondary:active{ transform:translateY(3px); box-shadow:0 0 0 var(--border); }
+  .btn-danger{ font-family:'Cormorant Garamond',serif; font-weight:700; font-size:15px; color:var(--bad); background:transparent; border:1px solid var(--bad); border-radius:8px; padding:8px 14px; cursor:pointer; }
+
+  .screen{ display:flex; flex-direction:column; gap:22px; }
+  .eyebrow{ font-family:'Courier Prime',monospace; font-size:12px; letter-spacing:.12em; text-transform:uppercase; color:var(--muted); }
+  .error-banner{ background:color-mix(in srgb, var(--bad) 14%, transparent); border:1px solid var(--bad); color:var(--bad); border-radius:10px; padding:12px 16px; font-size:14px; }
+
+  /* ---- Kid login ---- */
+  .profile-grid{ display:grid; grid-template-columns:repeat(auto-fill,minmax(140px,1fr)); gap:14px; }
+  .profile-card{ padding:18px 12px; display:flex; flex-direction:column; align-items:center; gap:8px; text-align:center; }
+  .profile-card .avatar{ width:56px; height:56px; font-size:30px; }
+  .profile-card .pname{ font-weight:700; font-size:16px; font-family:'Cormorant Garamond',serif; }
+  .profile-card .pstars{ font-size:12px; color:var(--gold); font-family:'Courier Prime',monospace; }
+
+  /* ---- Modal (PIN entry, parent gate) ---- */
+  .modal-backdrop{ position:fixed; inset:0; background:color-mix(in srgb, #000 45%, transparent); display:flex; align-items:center; justify-content:center; padding:20px; z-index:50; }
+  .modal-card{ background:var(--surface); border:1px solid var(--border); border-radius:14px; padding:26px; max-width:340px; width:100%; display:flex; flex-direction:column; gap:14px; text-align:center; }
+  .modal-card h3{ font-size:20px; }
+  .pin-input{ font-family:'Courier Prime',monospace; font-size:28px; letter-spacing:.5em; text-align:center; padding:12px 10px 12px 18px; border-radius:10px; border:1px solid var(--border); background:var(--surface-2); color:var(--ink); width:100%; }
+  .pin-input:focus{ outline:2px solid var(--accent); }
+  .modal-actions{ display:flex; gap:10px; justify-content:center; flex-wrap:wrap; }
+  .modal-error{ color:var(--bad); font-size:13px; min-height:16px; }
+
+  .text-input{ font-family:'Crimson Pro',serif; font-size:16px; font-weight:600; padding:12px 14px; border-radius:10px; border:1px solid var(--border); background:var(--surface); color:var(--ink); width:100%; }
+  .text-input:focus{ outline:2px solid var(--accent); }
+  .avatar-pick{ display:flex; flex-wrap:wrap; gap:8px; justify-content:center; }
+  .avatar-pick button{ width:44px; height:44px; border-radius:50%; font-size:20px; border:2px solid var(--border); background:var(--surface-2); cursor:pointer; }
+  .avatar-pick button.selected{ border-color:var(--accent); background:var(--surface); }
+
+  /* ---- Lesson map ---- */
+  .lesson-path{ display:grid; grid-template-columns:repeat(auto-fill,minmax(160px,1fr)); gap:16px 14px; }
+  .lesson-node{ position:relative; padding:16px 14px; display:flex; flex-direction:column; gap:6px; min-height:126px; text-align:left; }
+  .lesson-node .step{ font-family:'Courier Prime',monospace; font-size:11px; color:var(--muted); }
+  .lesson-node .ltitle{ font-family:'Cormorant Garamond',serif; font-weight:700; font-size:18px; }
+  .lesson-node .lkeys{ font-family:'Courier Prime',monospace; font-size:12px; color:var(--muted); }
+  .lesson-node .lstars{ margin-top:auto; font-family:'Courier Prime',monospace; color:var(--gold); font-size:14px; }
+  .lesson-node.locked{ opacity:.45; cursor:not-allowed; box-shadow:none; }
+  .lesson-node.locked:active{ transform:none; }
+  .lesson-node.next{ outline:3px solid var(--accent); outline-offset:2px; animation:pulse 1.8s ease-in-out infinite; }
+  @keyframes pulse{ 0%,100%{ box-shadow:0 3px 0 var(--border), 0 0 0 color-mix(in srgb, var(--accent) 35%, transparent);} 50%{ box-shadow:0 3px 0 var(--border), 0 0 16px color-mix(in srgb, var(--accent) 55%, transparent);} }
+  @media (prefers-reduced-motion: reduce){ .lesson-node.next{ animation:none; } }
+
+  /* ---- Typing stage ---- */
+  .stage-head{ display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap; }
+  .lesson-note{ font-style:italic; color:var(--muted); font-size:15px; margin:0; }
+  .stats-strip{ display:flex; gap:10px; flex-wrap:wrap; }
+  .stat-tile{ background:var(--surface); border:1px solid var(--border); border-radius:10px; padding:8px 16px; min-width:84px; text-align:center; }
+  .stat-tile .v{ font-family:'Courier Prime',monospace; font-weight:700; font-size:20px; font-variant-numeric:tabular-nums; }
+  .stat-tile .l{ font-size:11px; color:var(--muted); text-transform:uppercase; letter-spacing:.06em; }
+
+  .progress-track{ height:8px; border-radius:999px; background:var(--surface-2); overflow:hidden; }
+  .progress-fill{ height:100%; background:var(--accent); width:0%; transition:width .15s ease; }
+
+  .type-field{ position:relative; background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:26px 24px; }
+  .type-text{ font-family:'Courier Prime',monospace; font-size:clamp(17px,2.8vw,24px); line-height:1.8; letter-spacing:.3px; color:var(--muted); }
+  .type-text .ch{ position:relative; }
+  .type-text .ch.correct{ color:var(--good); }
+  .type-text .ch.incorrect{ color:var(--bad); background:color-mix(in srgb, var(--bad) 18%, transparent); border-radius:3px; }
+  .type-text .ch.current::before{ content:""; position:absolute; left:-1px; top:1px; bottom:1px; width:2px; background:var(--caret); animation:blink 1s step-end infinite; }
+  @media (prefers-reduced-motion: reduce){ .type-text .ch.current::before{ animation:none; } }
+  @keyframes blink{ 50%{ opacity:0; } }
+  .type-input{ position:absolute; opacity:0; width:1px; height:1px; pointer-events:none; }
+  .type-overlay{ position:absolute; inset:0; border-radius:12px; background:color-mix(in srgb, var(--surface) 88%, transparent); display:flex; align-items:center; justify-content:center; font-family:'Cormorant Garamond',serif; font-weight:700; font-size:18px; cursor:text; color:var(--muted); text-align:center; padding:20px; }
+  .verse-refs{ font-size:13px; color:var(--muted); font-style:italic; margin:2px 2px 0; }
+
+  /* ---- Virtual keyboard ---- */
+  .kb{ display:flex; flex-direction:column; gap:6px; background:var(--surface-2); border-radius:14px; padding:14px; overflow-x:auto; }
+  .kb-row{ display:flex; gap:6px; }
+  .key{ flex:1 0 0; min-width:26px; height:40px; border-radius:7px; background:var(--surface); border:1px solid var(--border); display:flex; align-items:center; justify-content:center; font-family:'Courier Prime',monospace; font-size:12px; font-weight:700; color:var(--ink); position:relative; transition:transform .06s ease, box-shadow .12s ease; }
+  .key.decor{ color:var(--muted); font-size:10px; font-weight:400; }
+  .key.active{ background:var(--accent); color:#fff; transform:scale(1.12) translateY(-2px); box-shadow:0 4px 12px rgba(0,0,0,.25); z-index:2; }
+  .key.active.shiftkey{ background:var(--ink); }
+  .kb-legend{ display:flex; flex-wrap:wrap; gap:8px 14px; padding:2px 4px 0; font-size:11px; color:var(--muted); }
+  .kb-legend span{ display:inline-flex; align-items:center; gap:5px; }
+  .kb-legend i{ width:10px; height:10px; border-radius:3px; display:inline-block; background:var(--dot,var(--accent)); }
+
+  /* ---- Results ---- */
+  .results-card{ padding:28px 24px; display:flex; flex-direction:column; align-items:center; gap:14px; text-align:center; }
+  .stars-row{ display:flex; gap:8px; font-size:40px; }
+  .star{ opacity:.25; transform:scale(.8); transition:transform .25s ease, opacity .25s ease; color:var(--gold); }
+  .star.lit{ opacity:1; transform:scale(1); }
+  .results-msg{ font-family:'Cormorant Garamond',serif; font-weight:700; font-size:21px; }
+  .results-stats{ display:flex; gap:22px; flex-wrap:wrap; justify-content:center; }
+  .results-actions{ display:flex; gap:12px; flex-wrap:wrap; justify-content:center; margin-top:6px; }
+  .results-refs{ font-size:13px; color:var(--muted); font-style:italic; }
+
+  /* ---- Leaderboard ---- */
+  .board-tabs{ display:flex; gap:8px; flex-wrap:wrap; }
+  .board-tab{ font-family:'Cormorant Garamond',serif; font-weight:700; font-size:14px; padding:8px 16px; border-radius:999px; border:1px solid var(--border); background:var(--surface); cursor:pointer; color:var(--muted); }
+  .board-tab.active{ background:var(--accent); color:#fff; border-color:var(--accent); }
+  .board-rows{ display:flex; flex-direction:column; gap:10px; }
+  .board-row{ display:flex; align-items:center; gap:14px; padding:14px 16px; }
+  .board-rank{ font-family:'Cormorant Garamond',serif; font-weight:700; font-size:22px; color:var(--gold); width:34px; text-align:center; flex:none; }
+  .board-name{ font-family:'Cormorant Garamond',serif; font-weight:700; font-size:17px; }
+  .board-meta{ font-size:12px; color:var(--muted); font-family:'Courier Prime',monospace; }
+  .board-value{ margin-left:auto; font-family:'Courier Prime',monospace; font-weight:700; font-size:20px; text-align:right; }
+
+  /* ---- Admin portal ---- */
+  .admin-tabs{ display:flex; gap:8px; flex-wrap:wrap; }
+  .admin-panel{ display:flex; flex-direction:column; gap:16px; }
+  .kid-row{ padding:14px 16px; display:flex; align-items:center; gap:12px; flex-wrap:wrap; }
+  .kid-row .info{ flex:1; min-width:140px; }
+  .kid-row .kname{ font-family:'Cormorant Garamond',serif; font-weight:700; font-size:16px; }
+  .kid-row .kmeta{ font-size:12px; color:var(--muted); font-family:'Courier Prime',monospace; }
+  .kid-row .actions{ display:flex; gap:8px; flex-wrap:wrap; }
+  .add-kid-form{ padding:18px; display:flex; flex-direction:column; gap:12px; max-width:420px; }
+  .field-row{ display:flex; gap:10px; flex-wrap:wrap; }
+  .field-row .text-input{ flex:1; min-width:120px; }
+  .dash-grid{ display:grid; grid-template-columns:repeat(auto-fill,minmax(260px,1fr)); gap:16px; }
+  .dash-card{ padding:16px; display:flex; flex-direction:column; gap:10px; cursor:default; }
+  .dash-card:active{ transform:none; box-shadow:0 3px 0 var(--border); }
+  .dash-head{ display:flex; align-items:center; gap:10px; }
+  .dash-head .avatar{ width:44px; height:44px; font-size:24px; }
+  .dash-name{ font-family:'Cormorant Garamond',serif; font-weight:700; font-size:18px; }
+  .dash-meta{ font-size:12px; color:var(--muted); font-family:'Courier Prime',monospace; }
+  .dash-pips{ display:flex; flex-wrap:wrap; gap:5px; }
+  .dash-pip{ width:20px; height:20px; border-radius:5px; border:1px solid var(--border); background:transparent; }
+  .dash-pip.s1{ background:color-mix(in srgb, var(--accent) 35%, transparent); }
+  .dash-pip.s2{ background:color-mix(in srgb, var(--accent) 65%, transparent); }
+  .dash-pip.s3{ background:var(--gold); border-color:var(--gold); }
+  .dash-updated{ font-size:11px; color:var(--muted); }
+
+  [hidden]{ display:none !important; }
+
+  @media (max-width:560px){
+    .stage-head{ flex-direction:column; align-items:flex-start; }
+    .key{ height:34px; font-size:10px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="app" id="app">
+  <header class="topbar">
+    <div class="brand"><span class="brand-mark">📜</span><span class="brand-name"><span class="drop">T</span>he Young Scribe</span></div>
+    <div class="nav-actions">
+      <div class="player-badge" id="playerBadge" hidden>
+        <span class="avatar" id="playerAvatar">🦁</span>
+        <span class="player-info">
+          <span class="player-name" id="playerName">—</span>
+          <span class="player-stars" id="playerStars">0 ★</span>
+        </span>
+        <button class="ghost-btn" id="leaderboardBtn" type="button">🏆 Leaderboard</button>
+        <button class="ghost-btn" id="switchPlayerBtn" type="button">Switch Scribe</button>
+      </div>
+      <button class="ghost-btn" id="parentPortalBtn" type="button">Parent Portal</button>
+    </div>
+  </header>
+
+  <main id="mainArea">
+    <!-- KID LOGIN -->
+    <section id="screen-kid-login" class="screen">
+      <div>
+        <div class="eyebrow">Begin</div>
+        <h1>Who is scribing today?</h1>
+      </div>
+      <div id="loginError" class="error-banner" hidden></div>
+      <div class="profile-grid" id="profileGrid"></div>
+      <p style="color:var(--muted); font-size:14px;">Don't see your name? Ask a parent to add you in the Parent Portal.</p>
+    </section>
+
+    <!-- LESSON MAP -->
+    <section id="screen-map" class="screen" hidden>
+      <div>
+        <div class="eyebrow">The Scribe's Path</div>
+        <h1>Choose your next lesson</h1>
+      </div>
+      <div class="lesson-path" id="lessonPath"></div>
+    </section>
+
+    <!-- TYPING STAGE -->
+    <section id="screen-typing" class="screen" hidden>
+      <div class="stage-head">
+        <div>
+          <div class="eyebrow" id="typingEyebrow">Chapter 1</div>
+          <h2 id="typingTitle">First Letters</h2>
+        </div>
+        <button class="btn-secondary" id="quitLessonBtn" type="button">← Back to the Path</button>
+      </div>
+      <p class="lesson-note" id="lessonNote"></p>
+
+      <div class="stats-strip">
+        <div class="stat-tile"><div class="v mono" id="statWpm">0</div><div class="l">WPM</div></div>
+        <div class="stat-tile"><div class="v mono" id="statAcc">100%</div><div class="l">Accuracy</div></div>
+        <div class="stat-tile"><div class="v mono" id="statTime">0:00</div><div class="l">Time</div></div>
+        <div class="stat-tile"><div class="v mono" id="statErr">0</div><div class="l">Mistakes</div></div>
+      </div>
+
+      <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
+
+      <div class="type-field" id="typeField">
+        <div class="type-text mono" id="typeText"></div>
+        <input class="type-input" id="typeInput" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" />
+        <div class="type-overlay" id="typeOverlay">Touch here, then start copying the words below.</div>
+      </div>
+      <p class="verse-refs" id="verseRefs" hidden></p>
+
+      <div class="kb" id="virtualKeyboard"></div>
+      <div class="kb-legend">
+        <span><i style="--dot:var(--f-lp)"></i>Left pinky</span>
+        <span><i style="--dot:var(--f-lr)"></i>Left ring</span>
+        <span><i style="--dot:var(--f-lm)"></i>Left middle</span>
+        <span><i style="--dot:var(--f-li)"></i>Left index</span>
+        <span><i style="--dot:var(--f-ri)"></i>Right index</span>
+        <span><i style="--dot:var(--f-rm)"></i>Right middle</span>
+        <span><i style="--dot:var(--f-rr)"></i>Right ring</span>
+        <span><i style="--dot:var(--f-rp)"></i>Right pinky</span>
+        <span><i style="--dot:var(--f-th)"></i>Thumb</span>
+      </div>
+    </section>
+
+    <!-- RESULTS -->
+    <section id="screen-results" class="screen" hidden>
+      <div class="keycap results-card">
+        <div class="eyebrow" id="resultsEyebrow">Lesson Complete</div>
+        <div class="stars-row" id="starsRow">
+          <span class="star" data-n="1">★</span>
+          <span class="star" data-n="2">★</span>
+          <span class="star" data-n="3">★</span>
+        </div>
+        <div class="results-msg" id="resultsMsg"></div>
+        <div class="results-stats">
+          <div class="stat-tile"><div class="v mono" id="resWpm">0</div><div class="l">WPM</div></div>
+          <div class="stat-tile"><div class="v mono" id="resAcc">0%</div><div class="l">Accuracy</div></div>
+          <div class="stat-tile"><div class="v mono" id="resTime">0:00</div><div class="l">Time</div></div>
+        </div>
+        <p class="results-refs" id="resultsRefs" hidden></p>
+        <div class="results-actions">
+          <button class="btn-secondary" id="retryBtn" type="button">Try Again</button>
+          <button class="btn-primary" id="nextBtn" type="button">Next Lesson →</button>
+          <button class="ghost-btn" id="mapBtn" type="button">Back to the Path</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- LEADERBOARD -->
+    <section id="screen-leaderboard" class="screen" hidden>
+      <div class="stage-head">
+        <div>
+          <div class="eyebrow">Friendly Competition</div>
+          <h1>🏆 Leaderboard</h1>
+        </div>
+        <button class="btn-secondary" id="closeLeaderboardBtn" type="button">← Back</button>
+      </div>
+      <div class="board-tabs" id="boardTabs">
+        <button class="board-tab active" data-metric="stars" type="button">Most Stars</button>
+        <button class="board-tab" data-metric="wpm" type="button">Fastest Typing</button>
+        <button class="board-tab" data-metric="lessons" type="button">Lessons Completed</button>
+      </div>
+      <div class="board-rows" id="boardRows"></div>
+    </section>
+
+    <!-- ADMIN PORTAL -->
+    <section id="screen-admin" class="screen" hidden>
+      <div class="stage-head">
+        <div>
+          <div class="eyebrow">For Parents</div>
+          <h1>Parent Portal</h1>
+        </div>
+        <button class="btn-secondary" id="closeAdminBtn" type="button">← Back</button>
+      </div>
+      <div class="admin-tabs">
+        <button class="board-tab active" data-tab="kids" type="button">Manage Scribes</button>
+        <button class="board-tab" data-tab="progress" type="button">Progress</button>
+        <button class="board-tab" data-tab="settings" type="button">Settings</button>
+      </div>
+
+      <div class="admin-panel" id="adminKidsPanel">
+        <div id="kidsList" style="display:flex; flex-direction:column; gap:10px;"></div>
+        <div class="keycap add-kid-form">
+          <h3>Add a new scribe</h3>
+          <input class="text-input" id="newKidName" maxlength="16" placeholder="Kid's name" autocomplete="off" />
+          <div class="avatar-pick" id="avatarPick"></div>
+          <input class="text-input" id="newKidPin" maxlength="4" inputmode="numeric" placeholder="4-digit PIN for them to log in" autocomplete="off" />
+          <button class="btn-primary" id="addKidBtn" type="button">Add Scribe</button>
+          <p class="modal-error" id="addKidError"></p>
+        </div>
+      </div>
+
+      <div class="admin-panel" id="adminProgressPanel" hidden>
+        <div class="dash-grid" id="dashGrid"></div>
+      </div>
+
+      <div class="admin-panel" id="adminSettingsPanel" hidden>
+        <div class="keycap add-kid-form">
+          <h3>Change parent PIN</h3>
+          <input class="text-input" id="newParentPin" maxlength="8" inputmode="numeric" placeholder="New parent PIN (4+ digits)" autocomplete="off" />
+          <button class="btn-secondary" id="changeParentPinBtn" type="button">Update PIN</button>
+          <p class="modal-error" id="parentPinError"></p>
+        </div>
+      </div>
+    </section>
+  </main>
+</div>
+
+<!-- Kid PIN modal -->
+<div class="modal-backdrop" id="pinModalBackdrop" hidden>
+  <div class="modal-card">
+    <span class="avatar" id="pinModalAvatar" style="width:56px;height:56px;font-size:30px;margin:0 auto;">🦁</span>
+    <h3 id="pinModalName">Enter your PIN</h3>
+    <input class="pin-input" id="pinModalInput" type="password" inputmode="numeric" maxlength="4" autocomplete="off" />
+    <p class="modal-error" id="pinModalError"></p>
+    <div class="modal-actions">
+      <button class="btn-primary" id="pinModalSubmit" type="button">Go</button>
+      <button class="ghost-btn" id="pinModalCancel" type="button">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- Parent gate modal -->
+<div class="modal-backdrop" id="parentGateBackdrop" hidden>
+  <div class="modal-card">
+    <h3 id="parentGateTitle">Parent PIN</h3>
+    <p id="parentGateHint" style="font-size:13px; color:var(--muted); margin:0;"></p>
+    <input class="pin-input" id="parentGateInput" type="password" inputmode="numeric" maxlength="8" autocomplete="off" />
+    <input class="pin-input" id="parentGateConfirm" type="password" inputmode="numeric" maxlength="8" autocomplete="off" hidden placeholder="confirm" />
+    <p class="modal-error" id="parentGateError"></p>
+    <div class="modal-actions">
+      <button class="btn-primary" id="parentGateSubmit" type="button">Enter</button>
+      <button class="ghost-btn" id="parentGateCancel" type="button">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore-compat.js"></script>
+<script>
+(function(){
+  "use strict";
+
+  // =====================================================================
+  // FIREBASE SETUP — replace this whole object with the config Firebase
+  // gives you when you create a Web App inside your Firebase project
+  // (Project settings → General → Your apps → Web app → SDK setup).
+  // =====================================================================
+  var firebaseConfig = {
+    apiKey: "REPLACE_WITH_YOUR_API_KEY",
+    authDomain: "REPLACE_WITH_YOUR_PROJECT.firebaseapp.com",
+    projectId: "REPLACE_WITH_YOUR_PROJECT_ID",
+    storageBucket: "REPLACE_WITH_YOUR_PROJECT.appspot.com",
+    messagingSenderId: "REPLACE_WITH_YOUR_SENDER_ID",
+    appId: "REPLACE_WITH_YOUR_APP_ID"
+  };
+
+  var app = firebase.initializeApp(firebaseConfig);
+  var fdb = firebase.firestore();
+
+  var AVATARS = ["🦁","🐑","🕊️","🐘","🐫","🦒","🐢","🦉","🐍","🐟"];
+
+  var FINGER = {
+    "`":"lp","1":"lp","2":"lr","3":"lm","4":"li","5":"li","6":"ri","7":"ri","8":"rm","9":"rr","0":"rp","-":"rp","=":"rp",
+    "q":"lp","w":"lr","e":"lm","r":"li","t":"li","y":"ri","u":"ri","i":"rm","o":"rr","p":"rp","[":"rp","]":"rp","\\":"rp",
+    "a":"lp","s":"lr","d":"lm","f":"li","g":"li","h":"ri","j":"ri","k":"rm","l":"rr",";":"rp","'":"rp",
+    "z":"lp","x":"lr","c":"lm","v":"li","b":"li","n":"ri","m":"ri",",":"rm",".":"rr","/":"rp",
+    " ":"th"
+  };
+  var FINGER_VAR = { lp:"--f-lp", lr:"--f-lr", lm:"--f-lm", li:"--f-li", ri:"--f-ri", rm:"--f-rm", rr:"--f-rr", rp:"--f-rp", th:"--f-th" };
+
+  var SHIFT_MAP = { "~":"`","!":"1","@":"2","#":"3","$":"4","%":"5","^":"6","&":"7","*":"8","(":"9",")":"0","_":"-","+":"=",
+    "{":"[","}":"]","|":"\\",":":";","\"":"'","<":",",">":".","?":"/" };
+
+  var KB_ROWS = [
+    [{k:"`"},{k:"1"},{k:"2"},{k:"3"},{k:"4"},{k:"5"},{k:"6"},{k:"7"},{k:"8"},{k:"9"},{k:"0"},{k:"-"},{k:"="},{k:"⌫",decor:true,w:2}],
+    [{k:"Tab",decor:true,w:1.5},{k:"q"},{k:"w"},{k:"e"},{k:"r"},{k:"t"},{k:"y"},{k:"u"},{k:"i"},{k:"o"},{k:"p"},{k:"["},{k:"]"},{k:"\\",w:1.2}],
+    [{k:"Caps",decor:true,w:1.75},{k:"a"},{k:"s"},{k:"d"},{k:"f"},{k:"g"},{k:"h"},{k:"j"},{k:"k"},{k:"l"},{k:";"},{k:"'"},{k:"Enter",decor:true,w:1.9}],
+    [{k:"Shift",decor:true,w:2.25,id:"shiftL"},{k:"z"},{k:"x"},{k:"c"},{k:"v"},{k:"b"},{k:"n"},{k:"m"},{k:","},{k:"."},{k:"/"},{k:"Shift",decor:true,w:2.25,id:"shiftR"}],
+    [{k:"Ctrl",decor:true,w:1.4},{k:"Alt",decor:true,w:1.3},{k:" ",label:"space",w:6.5},{k:"Alt",decor:true,w:1.3},{k:"Ctrl",decor:true,w:1.4}]
+  ];
+
+  function shuffle(arr){
+    var a = arr.slice();
+    for (var i = a.length - 1; i > 0; i--){
+      var j = Math.floor(Math.random() * (i + 1));
+      var t = a[i]; a[i] = a[j]; a[j] = t;
+    }
+    return a;
+  }
+
+  function generateCharDrill(keys, targetLen){
+    var out = [];
+    var count = 0;
+    while (count < targetLen){
+      var chunkLen = 2 + Math.floor(Math.random() * 3);
+      var chunk = "";
+      for (var i = 0; i < chunkLen; i++){
+        chunk += keys[Math.floor(Math.random() * keys.length)];
+      }
+      out.push(chunk);
+      count += chunkLen;
+    }
+    return { text: out.join(" "), refs: [] };
+  }
+
+  function generateWordLine(words, targetLen){
+    var pool = shuffle(words);
+    var out = [];
+    var count = 0;
+    var idx = 0;
+    while (count < targetLen){
+      if (idx >= pool.length){ pool = shuffle(words); idx = 0; }
+      var w = pool[idx++];
+      out.push(w);
+      count += w.length + 1;
+    }
+    return { text: out.join(" "), refs: [] };
+  }
+
+  function generateSentenceLine(sentences, n){
+    var pool = shuffle(sentences).slice(0, n);
+    return {
+      text: pool.map(function(s){ return s.text; }).join(" "),
+      refs: pool.map(function(s){ return s.ref; })
+    };
+  }
+
+  var LESSONS = [
+    { id:"l1", title:"First Letters", type:"chars", keys:["a","s","d","f","j","k","l",";"], len:60, targetWpm:6,
+      note:"Rest your fingers on A S D F and J K L ; — this is called the home row." },
+    { id:"l2", title:"Steady Hands", type:"chars", keys:["a","s","d","f","g","h","j","k","l",";"], len:65, targetWpm:7,
+      note:"Now reach in to G and H without looking down at your hands." },
+    { id:"l3", title:"Names of Old", type:"words", len:80, targetWpm:10,
+      note:"These are real names from the book of Genesis: Asa, Gad, Adah, Salah, and Hadassah!",
+      words:["asa","gad","adah","salah","hadassah","ask","dad","sad","lad","all","fall","hall","half","glad","dash","gala","shall","flags","jag","hag","fads","sags","lags","flask","salad","glass","lass"] },
+    { id:"l4", title:"Rising Words", type:"chars", keys:["q","w","e","r","t","y","u","i","o","p"], len:65, targetWpm:8,
+      note:"Stretch your fingers up to the top row of keys." },
+    { id:"l5", title:"Words of Faith", type:"words", len:90, targetWpm:12,
+      note:"Words about faith, using only the top and home row keys.",
+      words:["faith","hope","gospel","shepherd","holy","glory","trust","delight","righteous","worship","word","guide","guard","steadfast","restore","gates","waters","quiet","prayer","spirit","psalter"] },
+    { id:"l6", title:"Deeper Roots", type:"chars", keys:["z","x","c","v","b","n","m",",",".","/"], len:65, targetWpm:8,
+      note:"The bottom row finishes the alphabet — almost there!" },
+    { id:"l7", title:"The Full Alphabet", type:"words", len:95, targetWpm:13,
+      note:"Words and names found all through Scripture.",
+      words:["grace","mercy","kingdom","wisdom","blessed","angel","heaven","praise","psalm","prophet","disciple","miracle","covenant","salvation","manger","forgiveness","kindness","gentle","joyful","thankful","courage","wilderness","moses","noah","david","daniel","jonah","ruth","mary","joseph","nazareth","egypt","jordan","bethlehem"] },
+    { id:"l8", title:"Sacred Numbers", type:"words", len:80, targetWpm:10,
+      note:"Fun facts and numbers from the Bible — can you guess what they mean?",
+      words:["10","commandments","12","disciples","12","tribes","40","days","40","years","3","wise","men","150","psalms","66","books","5","loaves","2","fish","6","days","1","god","2","tablets","9","fruits","8","beatitudes"] },
+    { id:"l9", title:"In the Beginning", type:"sentences", n:3, targetWpm:14,
+      note:"Short verses to copy — remember to capitalize the first word!",
+      sentences:[
+        {text:"God is love.", ref:"1 John 4:8"},
+        {text:"Jesus wept.", ref:"John 11:35"},
+        {text:"The Lord is my shepherd.", ref:"Psalm 23:1"},
+        {text:"Let there be light.", ref:"Genesis 1:3"},
+        {text:"I am the way, the truth, and the life.", ref:"John 14:6"},
+        {text:"Ask, and it will be given to you.", ref:"Matthew 7:7"},
+        {text:"Love your neighbor as yourself.", ref:"Mark 12:31"},
+        {text:"Be still, and know that I am God.", ref:"Psalm 46:10"}
+      ] },
+    { id:"l10", title:"Voices of the Psalms", type:"sentences", n:3, targetWpm:14,
+      note:"Verses with commas, questions, and exclamation marks.",
+      sentences:[
+        {text:"Rejoice in the Lord always!", ref:"Philippians 4:4"},
+        {text:"Fear not, for I am with you.", ref:"Isaiah 41:10"},
+        {text:"Who is like the Lord our God?", ref:"Psalm 113:5"},
+        {text:"Praise the Lord!", ref:"Psalm 150:1"},
+        {text:"Trust in the Lord, and do good.", ref:"Psalm 37:3"},
+        {text:"What must I do to be saved?", ref:"Acts 16:30"},
+        {text:"Peace be with you!", ref:"John 20:19"},
+        {text:"Seek, and you will find.", ref:"Matthew 7:7"}
+      ] },
+    { id:"l11", title:"Verses to Remember", type:"sentences", n:3, targetWpm:18,
+      note:"Full verses to copy carefully — see if you can remember one by heart!",
+      sentences:[
+        {text:"The Lord is my shepherd; I shall not want.", ref:"Psalm 23:1"},
+        {text:"For God so loved the world that he gave his only Son.", ref:"John 3:16"},
+        {text:"I can do all things through him who strengthens me.", ref:"Philippians 4:13"},
+        {text:"Trust in the Lord with all your heart, and lean not on your own understanding.", ref:"Proverbs 3:5"},
+        {text:"Let all that you do be done in love.", ref:"1 Corinthians 16:14"},
+        {text:"Be strong and courageous, and do not be afraid.", ref:"Joshua 1:9"},
+        {text:"This is the day that the Lord has made; let us rejoice and be glad in it.", ref:"Psalm 118:24"},
+        {text:"Faith, hope, and love remain, and the greatest of these is love.", ref:"1 Corinthians 13:13"}
+      ] }
+  ];
+
+  function subtitleFor(lesson){
+    if (lesson.type === "chars") return lesson.keys.join(" ").toUpperCase();
+    if (lesson.type === "words") return lesson.words.slice(0,3).join(" · ");
+    return lesson.sentences[0].text;
+  }
+
+  function buildText(lesson){
+    if (lesson.type === "chars") return generateCharDrill(lesson.keys, lesson.len);
+    if (lesson.type === "words") return generateWordLine(lesson.words, lesson.len);
+    return generateSentenceLine(lesson.sentences, lesson.n);
+  }
+
+  var MESSAGES = {
+    3: ["Well done, faithful scribe! 📜✨","Your hands are swift and true!","A perfect copy — well done indeed!"],
+    2: ["Good and faithful effort! Keep going.","You're growing steadier each day.","Almost a perfect copy — try again?"],
+    1: ["You finished! Practice makes you stronger.","Good try — copy it again to improve.","Every scribe starts with small steps."],
+    0: ["Slow and steady — try again with care.","Take your time copying each word."]
+  };
+
+  function slugify(name){
+    return name.toLowerCase().trim().replace(/[^a-z0-9]+/g,"-").replace(/^-+|-+$/g,"") || "scribe";
+  }
+
+  // =====================================================================
+  // DATA LAYER (Firestore)
+  // =====================================================================
+  var profilesCol = fdb.collection("profiles");
+  var configDoc = fdb.collection("config").doc("admin");
+
+  function totalStars(profile){
+    var sum = 0;
+    Object.keys((profile && profile.progress) || {}).forEach(function(id){ sum += (profile.progress[id].stars || 0); });
+    return sum;
+  }
+
+  var DataLayer = {
+    async listProfiles(){
+      var snap = await profilesCol.get();
+      return snap.docs.map(function(d){ var data = d.data(); data._id = d.id; return data; });
+    },
+    async getProfile(id){
+      var snap = await profilesCol.doc(id).get();
+      return snap.exists ? Object.assign({}, snap.data(), { _id: id }) : null;
+    },
+    async createProfile(name, avatar, pin){
+      var base = slugify(name);
+      var id = base;
+      var n = 1;
+      while (await this.getProfile(id)){ id = base + "-" + (++n); }
+      var doc = { name: name, avatar: avatar, pin: pin, createdAt: Date.now(), updatedAt: Date.now(), progress: {}, log: [] };
+      await profilesCol.doc(id).set(doc);
+      return Object.assign({}, doc, { _id: id });
+    },
+    async updateKidPin(id, pin){
+      await profilesCol.doc(id).update({ pin: pin, updatedAt: Date.now() });
+    },
+    async deleteProfile(id){
+      await profilesCol.doc(id).delete();
+    },
+    async recordResult(id, lessonId, result){
+      var current = await this.getProfile(id);
+      var prev = (current && current.progress && current.progress[lessonId]) || { stars:0, bestWpm:0, bestAccuracy:0 };
+      var merged = {
+        stars: Math.max(prev.stars, result.stars),
+        bestWpm: Math.max(prev.bestWpm, result.wpm),
+        bestAccuracy: Math.max(prev.bestAccuracy, result.acc)
+      };
+      var log = (current && current.log) || [];
+      log = log.concat([{
+        lessonId: lessonId, lessonTitle: result.lessonTitle, stars: result.stars,
+        wpm: result.wpm, acc: result.acc, refs: result.refs || [], at: Date.now()
+      }]);
+      if (log.length > 40) log = log.slice(log.length - 40);
+      var patch = { updatedAt: Date.now(), log: log };
+      patch["progress." + lessonId] = merged;
+      await profilesCol.doc(id).update(patch);
+      return merged;
+    },
+    async getAdminConfig(){
+      var snap = await configDoc.get();
+      return snap.exists ? snap.data() : null;
+    },
+    async setAdminPin(pin){
+      await configDoc.set({ pin: pin, updatedAt: Date.now() }, { merge: true });
+    }
+  };
+
+  var currentProfile = null;
+  var currentLesson = null;
+  var currentText = "";
+  var currentRefs = [];
+  var startTime = null;
+  var timerInterval = null;
+  var keystrokes = 0;
+  var mistakes = 0;
+  var finished = false;
+  var isParentAuthed = false;
+
+  // ---------- element refs ----------
+  var el = {};
+  ["playerBadge","playerAvatar","playerName","playerStars","switchPlayerBtn","leaderboardBtn","parentPortalBtn",
+   "screen-kid-login","screen-map","screen-typing","screen-results","screen-leaderboard","screen-admin",
+   "loginError","profileGrid",
+   "lessonPath","typingEyebrow","typingTitle","lessonNote","quitLessonBtn",
+   "statWpm","statAcc","statTime","statErr","progressFill",
+   "typeField","typeText","typeInput","typeOverlay","verseRefs","virtualKeyboard",
+   "resultsEyebrow","starsRow","resultsMsg","resWpm","resAcc","resTime","resultsRefs",
+   "retryBtn","nextBtn","mapBtn",
+   "boardTabs","boardRows","closeLeaderboardBtn",
+   "closeAdminBtn","kidsList","newKidName","avatarPick","newKidPin","addKidBtn","addKidError",
+   "dashGrid","newParentPin","changeParentPinBtn","parentPinError",
+   "pinModalBackdrop","pinModalAvatar","pinModalName","pinModalInput","pinModalError","pinModalSubmit","pinModalCancel",
+   "parentGateBackdrop","parentGateTitle","parentGateHint","parentGateInput","parentGateConfirm","parentGateError","parentGateSubmit","parentGateCancel"
+  ].forEach(function(id){ el[id] = document.getElementById(id); });
+
+  var SCREENS = ["screen-kid-login","screen-map","screen-typing","screen-results","screen-leaderboard","screen-admin"];
+  var lastScreen = "screen-kid-login";
+
+  function showScreen(name){
+    var current = SCREENS.find(function(s){ return !el[s].hidden; });
+    if (current && current !== "screen-leaderboard" && current !== "screen-admin") lastScreen = current;
+    SCREENS.forEach(function(s){ el[s].hidden = (s !== name); });
+  }
+
+  // =====================================================================
+  // KID LOGIN
+  // =====================================================================
+  async function renderProfileGrid(){
+    el.profileGrid.innerHTML = '<p style="color:var(--muted);">Loading scribes…</p>';
+    el.loginError.hidden = true;
+    try {
+      var profiles = await DataLayer.listProfiles();
+      el.profileGrid.innerHTML = "";
+      profiles.forEach(function(p){
+        var card = document.createElement("button");
+        card.type = "button";
+        card.className = "keycap profile-card";
+        card.innerHTML =
+          '<span class="avatar">' + p.avatar + '</span>' +
+          '<span class="pname"></span>' +
+          '<span class="pstars">' + totalStars(p) + ' ★</span>';
+        card.querySelector(".pname").textContent = p.name;
+        card.addEventListener("click", function(){ openPinModal(p); });
+        el.profileGrid.appendChild(card);
+      });
+    } catch(e){
+      el.profileGrid.innerHTML = "";
+      el.loginError.hidden = false;
+      el.loginError.textContent = "Couldn't reach the scribe list. Check your internet connection and try again.";
+    }
+  }
+
+  function openPinModal(profile){
+    el.pinModalAvatar.textContent = profile.avatar;
+    el.pinModalName.textContent = "Enter " + profile.name + "'s PIN";
+    el.pinModalInput.value = "";
+    el.pinModalError.textContent = "";
+    el.pinModalBackdrop.hidden = false;
+    el.pinModalInput.focus();
+    el.pinModalBackdrop.dataset.profileId = profile._id;
+  }
+  function closePinModal(){ el.pinModalBackdrop.hidden = true; }
+
+  async function submitPin(){
+    var id = el.pinModalBackdrop.dataset.profileId;
+    var entered = el.pinModalInput.value.trim();
+    var profile = await DataLayer.getProfile(id);
+    if (!profile){ el.pinModalError.textContent = "That profile no longer exists."; return; }
+    if (entered !== String(profile.pin)){
+      el.pinModalError.textContent = "That's not the right PIN. Try again.";
+      el.pinModalInput.value = "";
+      el.pinModalInput.focus();
+      return;
+    }
+    closePinModal();
+    await enterProfile(profile);
+  }
+  el.pinModalSubmit.addEventListener("click", submitPin);
+  el.pinModalCancel.addEventListener("click", closePinModal);
+  el.pinModalInput.addEventListener("keydown", function(e){ if (e.key === "Enter") submitPin(); });
+
+  async function enterProfile(profile){
+    currentProfile = profile;
+    updatePlayerBadge();
+    await renderLessonMap();
+    showScreen("screen-map");
+  }
+
+  function updatePlayerBadge(){
+    if (!currentProfile){ el.playerBadge.hidden = true; return; }
+    el.playerBadge.hidden = false;
+    el.playerAvatar.textContent = currentProfile.avatar;
+    el.playerName.textContent = currentProfile.name;
+    el.playerStars.textContent = totalStars(currentProfile) + " ★";
+  }
+
+  el.switchPlayerBtn.addEventListener("click", function(){
+    currentProfile = null;
+    updatePlayerBadge();
+    renderProfileGrid();
+    showScreen("screen-kid-login");
+  });
+
+  // =====================================================================
+  // LESSON MAP
+  // =====================================================================
+  function isUnlocked(index){
+    if (index === 0) return true;
+    var prev = LESSONS[index - 1];
+    var prog = currentProfile.progress[prev.id];
+    return !!(prog && prog.stars > 0);
+  }
+  function nextLessonIndex(){
+    for (var i = 0; i < LESSONS.length; i++){
+      var prog = currentProfile.progress[LESSONS[i].id];
+      if (!(prog && prog.stars > 0)) return i;
+    }
+    return -1;
+  }
+
+  async function renderLessonMap(){
+    var fresh = await DataLayer.getProfile(currentProfile._id);
+    if (fresh) currentProfile = fresh;
+    updatePlayerBadge();
+    var nextIdx = nextLessonIndex();
+    el.lessonPath.innerHTML = "";
+    LESSONS.forEach(function(lesson, i){
+      var unlocked = isUnlocked(i);
+      var prog = currentProfile.progress[lesson.id];
+      var node = document.createElement("button");
+      node.type = "button";
+      node.className = "keycap lesson-node" + (unlocked ? "" : " locked") + (i === nextIdx ? " next" : "");
+      var starStr = prog ? "★".repeat(prog.stars) + "☆".repeat(3 - prog.stars) : "☆☆☆";
+      node.innerHTML =
+        '<span class="step">CHAPTER ' + (i + 1) + (unlocked ? "" : " · LOCKED") + '</span>' +
+        '<span class="ltitle"></span>' +
+        '<span class="lkeys"></span>' +
+        '<span class="lstars">' + starStr + '</span>';
+      node.querySelector(".ltitle").textContent = lesson.title;
+      node.querySelector(".lkeys").textContent = subtitleFor(lesson);
+      if (unlocked){ node.addEventListener("click", function(){ startLesson(i); }); }
+      else { node.disabled = true; }
+      el.lessonPath.appendChild(node);
+    });
+  }
+
+  // =====================================================================
+  // VIRTUAL KEYBOARD
+  // =====================================================================
+  function buildKeyboard(){
+    el.virtualKeyboard.innerHTML = "";
+    KB_ROWS.forEach(function(row){
+      var rowEl = document.createElement("div");
+      rowEl.className = "kb-row";
+      row.forEach(function(spec){
+        var keyEl = document.createElement("div");
+        var isSpace = spec.k === " ";
+        keyEl.className = "key" + (spec.decor ? " decor" : "");
+        keyEl.style.flexGrow = spec.w || 1;
+        keyEl.textContent = isSpace ? "" : (spec.decor ? spec.k : spec.k.toUpperCase());
+        keyEl.dataset.key = spec.k;
+        if (spec.id) keyEl.dataset.id = spec.id;
+        if (!spec.decor){
+          var f = FINGER[spec.k];
+          if (f) keyEl.style.setProperty("--finger-color", "var(" + FINGER_VAR[f] + ")");
+        }
+        rowEl.appendChild(keyEl);
+      });
+      el.virtualKeyboard.appendChild(rowEl);
+    });
+  }
+  buildKeyboard();
+
+  function clearKeyHighlights(){
+    el.virtualKeyboard.querySelectorAll(".key.active").forEach(function(k){ k.classList.remove("active","shiftkey"); });
+  }
+  function highlightNextKey(ch){
+    clearKeyHighlights();
+    if (ch === undefined) return;
+    var needsShift = false;
+    var base = ch;
+    if (ch >= "A" && ch <= "Z"){ base = ch.toLowerCase(); needsShift = true; }
+    else if (SHIFT_MAP[ch]){ base = SHIFT_MAP[ch]; needsShift = true; }
+    var keyEl = el.virtualKeyboard.querySelector('.key[data-key="' + base.replace(/["\\]/g,"\\$&") + '"]');
+    if (keyEl) keyEl.classList.add("active");
+    if (needsShift){
+      var f = FINGER[base];
+      var shiftId = (f && f.charAt(0) === "l") ? "shiftR" : "shiftL";
+      var shiftEl = el.virtualKeyboard.querySelector('.key[data-id="' + shiftId + '"]');
+      if (shiftEl) shiftEl.classList.add("active","shiftkey");
+    }
+  }
+
+  // =====================================================================
+  // TYPING STAGE
+  // =====================================================================
+  function startLesson(index){
+    currentLesson = { index: index, def: LESSONS[index] };
+    var built = buildText(LESSONS[index]);
+    currentText = built.text;
+    currentRefs = built.refs;
+    keystrokes = 0; mistakes = 0; startTime = null; finished = false;
+    el.typingEyebrow.textContent = "Chapter " + (index + 1) + " of " + LESSONS.length;
+    el.typingTitle.textContent = LESSONS[index].title;
+    el.lessonNote.textContent = LESSONS[index].note || "";
+    el.typeInput.value = "";
+    el.typeInput.maxLength = currentText.length;
+    el.typeOverlay.hidden = false;
+    el.typeOverlay.textContent = "Touch here, then start copying the words below.";
+    if (currentRefs.length){
+      el.verseRefs.hidden = false;
+      el.verseRefs.textContent = "📖 Today's verses: " + currentRefs.join(" · ");
+    } else { el.verseRefs.hidden = true; }
+    renderTypeText();
+    updateStats(0, 100, 0);
+    highlightNextKey(currentText[0]);
+    if (timerInterval) clearInterval(timerInterval);
+    showScreen("screen-typing");
+  }
+
+  function renderTypeText(){
+    var value = el.typeInput.value;
+    var html = "";
+    for (var i = 0; i < currentText.length; i++){
+      var c = currentText[i];
+      var cls = "ch";
+      if (i < value.length) cls += (value[i] === c ? " correct" : " incorrect");
+      else if (i === value.length) cls += " current";
+      var display = c === " " ? "&nbsp;" : c.replace(/&/g,"&amp;").replace(/</g,"&lt;");
+      html += '<span class="' + cls + '">' + display + '</span>';
+    }
+    el.typeText.innerHTML = html;
+  }
+
+  function formatTime(sec){
+    var m = Math.floor(sec / 60);
+    var s = Math.floor(sec % 60);
+    return m + ":" + (s < 10 ? "0" : "") + s;
+  }
+  function updateStats(wpm, acc, elapsedSec){
+    el.statWpm.textContent = wpm;
+    el.statAcc.textContent = acc + "%";
+    el.statTime.textContent = formatTime(elapsedSec);
+    el.statErr.textContent = mistakes;
+    var pct = Math.min(100, Math.round((el.typeInput.value.length / currentText.length) * 100));
+    el.progressFill.style.width = pct + "%";
+  }
+  function currentAccuracy(){
+    var correct = Math.max(0, keystrokes - mistakes);
+    if (keystrokes === 0) return 100;
+    return Math.max(0, Math.round((correct / keystrokes) * 100));
+  }
+  function tickTimer(){
+    if (!startTime || finished) return;
+    var elapsedSec = (Date.now() - startTime) / 1000;
+    var minutes = elapsedSec / 60;
+    var typed = el.typeInput.value.length;
+    var wpm = minutes > 0 ? Math.round((typed / 5) / minutes) : 0;
+    updateStats(wpm, currentAccuracy(), elapsedSec);
+  }
+
+  el.typeField.addEventListener("click", function(){ el.typeInput.focus(); });
+  el.typeInput.addEventListener("focus", function(){ el.typeOverlay.hidden = true; });
+  el.typeInput.addEventListener("blur", function(){ if (!finished) el.typeOverlay.hidden = false; });
+
+  el.typeInput.addEventListener("keydown", function(e){
+    if (finished) { e.preventDefault(); return; }
+    if (e.key.length === 1 || e.key === "Backspace"){
+      if (e.key !== "Backspace") keystrokes++;
+      if (e.key.length === 1){
+        var idx = el.typeInput.value.length;
+        if (currentText[idx] !== undefined && e.key !== currentText[idx]) mistakes++;
+      }
+    }
+    if (!startTime && e.key.length === 1) {
+      startTime = Date.now();
+      timerInterval = setInterval(tickTimer, 250);
+    }
+  });
+
+  el.typeInput.addEventListener("input", function(){
+    renderTypeText();
+    var value = el.typeInput.value;
+    highlightNextKey(currentText[value.length]);
+    tickTimer();
+    if (value === currentText) finishLesson();
+  });
+
+  async function finishLesson(){
+    finished = true;
+    clearInterval(timerInterval);
+    clearKeyHighlights();
+    var elapsedSec = startTime ? (Date.now() - startTime) / 1000 : 0;
+    var minutes = Math.max(elapsedSec / 60, 1/60);
+    var wpm = Math.round((currentText.length / 5) / minutes);
+    var acc = currentAccuracy();
+    var def = currentLesson.def;
+    var stars = 0;
+    if (acc >= 97 && wpm >= def.targetWpm) stars = 3;
+    else if (acc >= 92 && wpm >= def.targetWpm * 0.6) stars = 2;
+    else if (acc >= 80) stars = 1;
+
+    var merged = await DataLayer.recordResult(currentProfile._id, def.id, { stars: stars, wpm: wpm, acc: acc, lessonTitle: def.title, refs: currentRefs });
+    currentProfile.progress[def.id] = merged;
+    updatePlayerBadge();
+    showResults(stars, wpm, acc, elapsedSec);
+  }
+
+  function showResults(stars, wpm, acc, elapsedSec){
+    el.resultsEyebrow.textContent = currentLesson.def.title + " — Complete";
+    el.starsRow.querySelectorAll(".star").forEach(function(s){ s.classList.toggle("lit", Number(s.dataset.n) <= stars); });
+    var pool = MESSAGES[stars] || MESSAGES[0];
+    el.resultsMsg.textContent = pool[Math.floor(Math.random() * pool.length)];
+    el.resWpm.textContent = wpm;
+    el.resAcc.textContent = acc + "%";
+    el.resTime.textContent = formatTime(elapsedSec);
+    if (currentRefs.length){
+      el.resultsRefs.hidden = false;
+      el.resultsRefs.textContent = "You just copied: " + currentRefs.join(" · ");
+    } else { el.resultsRefs.hidden = true; }
+    var hasNext = currentLesson.index < LESSONS.length - 1;
+    el.nextBtn.hidden = !(stars > 0 && hasNext);
+    showScreen("screen-results");
+  }
+
+  el.quitLessonBtn.addEventListener("click", async function(){ clearInterval(timerInterval); await renderLessonMap(); showScreen("screen-map"); });
+  el.retryBtn.addEventListener("click", function(){ startLesson(currentLesson.index); });
+  el.nextBtn.addEventListener("click", function(){ startLesson(currentLesson.index + 1); });
+  el.mapBtn.addEventListener("click", async function(){ await renderLessonMap(); showScreen("screen-map"); });
+
+  // =====================================================================
+  // LEADERBOARD
+  // =====================================================================
+  var boardMetric = "stars";
+  function computeBoardStats(p){
+    var passed = 0, stars = 0, bestWpm = 0, bestAcc = 0;
+    LESSONS.forEach(function(lesson){
+      var prog = p.progress && p.progress[lesson.id];
+      if (prog){
+        if (prog.stars > 0) passed++;
+        stars += prog.stars || 0;
+        if (prog.bestWpm > bestWpm) bestWpm = prog.bestWpm;
+        if (prog.bestAccuracy > bestAcc) bestAcc = prog.bestAccuracy;
+      }
+    });
+    return { passed: passed, stars: stars, bestWpm: bestWpm, bestAcc: bestAcc };
+  }
+
+  async function renderLeaderboard(){
+    el.boardRows.innerHTML = '<p style="color:var(--muted);">Loading…</p>';
+    var profiles = await DataLayer.listProfiles();
+    var rows = profiles.map(function(p){ return Object.assign({ profile: p }, computeBoardStats(p)); });
+    var sortKey = boardMetric === "stars" ? "stars" : boardMetric === "wpm" ? "bestWpm" : "passed";
+    rows.sort(function(a,b){ return b[sortKey] - a[sortKey]; });
+    el.boardRows.innerHTML = "";
+    if (!rows.length){
+      el.boardRows.innerHTML = '<p style="color:var(--muted);">No scribes yet.</p>';
+      return;
+    }
+    rows.forEach(function(r, i){
+      var row = document.createElement("div");
+      row.className = "keycap board-row";
+      var valueText = boardMetric === "stars" ? (r.stars + "/" + (LESSONS.length*3) + " ★")
+        : boardMetric === "wpm" ? (r.bestWpm + " WPM")
+        : (r.passed + "/" + LESSONS.length);
+      row.innerHTML =
+        '<span class="board-rank">' + (i+1) + '</span>' +
+        '<span class="avatar">' + r.profile.avatar + '</span>' +
+        '<div><div class="board-name"></div><div class="board-meta">' + r.stars + ' ★ · ' + r.passed + '/' + LESSONS.length + ' lessons · best ' + r.bestWpm + ' WPM</div></div>' +
+        '<span class="board-value">' + valueText + '</span>';
+      row.querySelector(".board-name").textContent = r.profile.name;
+      el.boardRows.appendChild(row);
+    });
+  }
+
+  el.boardTabs.querySelectorAll(".board-tab").forEach(function(tab){
+    tab.addEventListener("click", function(){
+      el.boardTabs.querySelectorAll(".board-tab").forEach(function(t){ t.classList.remove("active"); });
+      tab.classList.add("active");
+      boardMetric = tab.dataset.metric;
+      renderLeaderboard();
+    });
+  });
+  el.leaderboardBtn.addEventListener("click", function(){ showScreen("screen-leaderboard"); renderLeaderboard(); });
+  el.closeLeaderboardBtn.addEventListener("click", function(){ showScreen(lastScreen); });
+
+  // =====================================================================
+  // PARENT PORTAL
+  // =====================================================================
+  var selectedAvatar = AVATARS[0];
+  function renderAvatarPick(){
+    el.avatarPick.innerHTML = "";
+    AVATARS.forEach(function(a){
+      var b = document.createElement("button");
+      b.type = "button";
+      b.textContent = a;
+      if (a === selectedAvatar) b.className = "selected";
+      b.addEventListener("click", function(){ selectedAvatar = a; renderAvatarPick(); });
+      el.avatarPick.appendChild(b);
+    });
+  }
+  renderAvatarPick();
+
+  el.parentPortalBtn.addEventListener("click", async function(){
+    var cfg = await DataLayer.getAdminConfig();
+    el.parentGateError.textContent = "";
+    el.parentGateInput.value = "";
+    el.parentGateConfirm.value = "";
+    if (!cfg || !cfg.pin){
+      el.parentGateTitle.textContent = "Set up your parent PIN";
+      el.parentGateHint.textContent = "This is the first time — choose a PIN (4+ digits) you'll use to open the Parent Portal.";
+      el.parentGateConfirm.hidden = false;
+      el.parentGateBackdrop.dataset.mode = "bootstrap";
+    } else {
+      el.parentGateTitle.textContent = "Parent PIN";
+      el.parentGateHint.textContent = "Enter your parent PIN to continue.";
+      el.parentGateConfirm.hidden = true;
+      el.parentGateBackdrop.dataset.mode = "login";
+    }
+    el.parentGateBackdrop.hidden = false;
+    el.parentGateInput.focus();
+  });
+  el.parentGateCancel.addEventListener("click", function(){ el.parentGateBackdrop.hidden = true; });
+
+  async function submitParentGate(){
+    var mode = el.parentGateBackdrop.dataset.mode;
+    var pin = el.parentGateInput.value.trim();
+    if (mode === "bootstrap"){
+      var confirmPin = el.parentGateConfirm.value.trim();
+      if (pin.length < 4){ el.parentGateError.textContent = "Use at least 4 digits."; return; }
+      if (pin !== confirmPin){ el.parentGateError.textContent = "PINs don't match."; return; }
+      await DataLayer.setAdminPin(pin);
+      isParentAuthed = true;
+      el.parentGateBackdrop.hidden = true;
+      openAdminPortal();
+    } else {
+      var cfg = await DataLayer.getAdminConfig();
+      if (!cfg || pin !== String(cfg.pin)){
+        el.parentGateError.textContent = "That's not the right PIN.";
+        return;
+      }
+      isParentAuthed = true;
+      el.parentGateBackdrop.hidden = true;
+      openAdminPortal();
+    }
+  }
+  el.parentGateSubmit.addEventListener("click", submitParentGate);
+  el.parentGateInput.addEventListener("keydown", function(e){ if (e.key === "Enter" && el.parentGateConfirm.hidden) submitParentGate(); });
+
+  function openAdminPortal(){
+    showScreen("screen-admin");
+    renderKidsList();
+  }
+  el.closeAdminBtn.addEventListener("click", function(){ showScreen(lastScreen); if (lastScreen === "screen-kid-login") renderProfileGrid(); });
+
+  document.querySelectorAll('.admin-tabs .board-tab').forEach(function(tab){
+    tab.addEventListener("click", function(){
+      document.querySelectorAll('.admin-tabs .board-tab').forEach(function(t){ t.classList.remove("active"); });
+      tab.classList.add("active");
+      ["adminKidsPanel","adminProgressPanel","adminSettingsPanel"].forEach(function(p){ document.getElementById(p).hidden = true; });
+      if (tab.dataset.tab === "kids"){ document.getElementById("adminKidsPanel").hidden = false; renderKidsList(); }
+      if (tab.dataset.tab === "progress"){ document.getElementById("adminProgressPanel").hidden = false; renderAdminProgress(); }
+      if (tab.dataset.tab === "settings"){ document.getElementById("adminSettingsPanel").hidden = false; }
+    });
+  });
+
+  async function renderKidsList(){
+    el.kidsList.innerHTML = '<p style="color:var(--muted);">Loading…</p>';
+    var profiles = await DataLayer.listProfiles();
+    el.kidsList.innerHTML = "";
+    if (!profiles.length){
+      el.kidsList.innerHTML = '<p style="color:var(--muted);">No scribes yet — add one below.</p>';
+    }
+    profiles.forEach(function(p){
+      var row = document.createElement("div");
+      row.className = "keycap kid-row";
+      row.innerHTML =
+        '<span class="avatar">' + p.avatar + '</span>' +
+        '<div class="info"><div class="kname"></div><div class="kmeta">PIN: ' + p.pin + ' · ' + totalStars(p) + ' ★</div></div>' +
+        '<div class="actions">' +
+          '<button class="btn-secondary" data-act="pin">Change PIN</button>' +
+          '<button class="btn-danger" data-act="delete">Delete</button>' +
+        '</div>';
+      row.querySelector(".kname").textContent = p.name;
+      row.querySelector('[data-act="pin"]').addEventListener("click", async function(){
+        var newPin = prompt("New 4-digit PIN for " + p.name + ":", p.pin);
+        if (newPin && /^[0-9]{4,8}$/.test(newPin.trim())){
+          await DataLayer.updateKidPin(p._id, newPin.trim());
+          renderKidsList();
+        } else if (newPin !== null){
+          alert("PIN must be 4-8 digits.");
+        }
+      });
+      row.querySelector('[data-act="delete"]').addEventListener("click", async function(){
+        if (confirm("Delete " + p.name + "'s profile and all their progress? This cannot be undone.")){
+          await DataLayer.deleteProfile(p._id);
+          renderKidsList();
+        }
+      });
+      el.kidsList.appendChild(row);
+    });
+  }
+
+  el.addKidBtn.addEventListener("click", async function(){
+    var name = (el.newKidName.value || "").trim();
+    var pin = (el.newKidPin.value || "").trim();
+    el.addKidError.textContent = "";
+    if (!name){ el.addKidError.textContent = "Enter a name."; return; }
+    if (!/^[0-9]{4}$/.test(pin)){ el.addKidError.textContent = "PIN must be exactly 4 digits."; return; }
+    el.addKidBtn.disabled = true;
+    try {
+      await DataLayer.createProfile(name, selectedAvatar, pin);
+      el.newKidName.value = ""; el.newKidPin.value = "";
+      renderKidsList();
+    } catch(e){
+      el.addKidError.textContent = "Something went wrong — try again.";
+    } finally {
+      el.addKidBtn.disabled = false;
+    }
+  });
+
+  async function renderAdminProgress(){
+    el.dashGrid.innerHTML = '<p style="color:var(--muted);">Loading…</p>';
+    var profiles = await DataLayer.listProfiles();
+    el.dashGrid.innerHTML = "";
+    if (!profiles.length){
+      el.dashGrid.innerHTML = '<p style="color:var(--muted);">No scribes yet.</p>';
+      return;
+    }
+    profiles.forEach(function(p){
+      var stats = computeBoardStats(p);
+      var card = document.createElement("div");
+      card.className = "keycap dash-card";
+      var updated = p.updatedAt || p.createdAt;
+      var updatedStr = updated ? new Date(updated).toLocaleDateString(undefined,{month:"short",day:"numeric"}) : "—";
+      card.innerHTML =
+        '<div class="dash-head"><span class="avatar">' + p.avatar + '</span><div>' +
+          '<div class="dash-name"></div>' +
+          '<div class="dash-meta">' + stats.passed + '/' + LESSONS.length + ' lessons · ' + stats.stars + '/' + (LESSONS.length*3) + ' ★ · best ' + stats.bestWpm + ' WPM</div>' +
+        '</div></div>' +
+        '<div class="dash-pips"></div>' +
+        '<div class="dash-updated">Last practiced ' + updatedStr + '</div>';
+      card.querySelector(".dash-name").textContent = p.name;
+      var pipsEl = card.querySelector(".dash-pips");
+      LESSONS.forEach(function(lesson){
+        var prog = p.progress && p.progress[lesson.id];
+        var pip = document.createElement("div");
+        pip.className = "dash-pip" + (prog ? " s" + prog.stars : "");
+        pip.title = lesson.title + (prog ? " — " + prog.stars + "/3 ★, best " + prog.bestWpm + " WPM" : " — not started");
+        pipsEl.appendChild(pip);
+      });
+      el.dashGrid.appendChild(card);
+    });
+  }
+
+  el.changeParentPinBtn.addEventListener("click", async function(){
+    var pin = (el.newParentPin.value || "").trim();
+    el.parentPinError.textContent = "";
+    if (pin.length < 4){ el.parentPinError.textContent = "Use at least 4 digits."; return; }
+    await DataLayer.setAdminPin(pin);
+    el.newParentPin.value = "";
+    el.parentPinError.textContent = "Updated!";
+    el.parentPinError.style.color = "var(--good)";
+  });
+
+  // =====================================================================
+  // BOOT
+  // =====================================================================
+  renderProfileGrid();
+  showScreen("screen-kid-login");
+})();
+</script>
+</body>
+</html>
