@@ -390,28 +390,20 @@
   </div>
 </div>
 
-<script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore-compat.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 (function(){
   "use strict";
 
   // =====================================================================
-  // FIREBASE SETUP — replace this whole object with the config Firebase
-  // gives you when you create a Web App inside your Firebase project
-  // (Project settings → General → Your apps → Web app → SDK setup).
+  // SUPABASE SETUP — replace these two values with your project's URL and
+  // anon public key (Project Settings → API in the Supabase dashboard).
+  // The anon key is meant to be public; access is controlled by the Row
+  // Level Security policies in supabase-schema.sql instead.
   // =====================================================================
-  var firebaseConfig = {
-    apiKey: "REPLACE_WITH_YOUR_API_KEY",
-    authDomain: "REPLACE_WITH_YOUR_PROJECT.firebaseapp.com",
-    projectId: "REPLACE_WITH_YOUR_PROJECT_ID",
-    storageBucket: "REPLACE_WITH_YOUR_PROJECT.appspot.com",
-    messagingSenderId: "REPLACE_WITH_YOUR_SENDER_ID",
-    appId: "REPLACE_WITH_YOUR_APP_ID"
-  };
-
-  var app = firebase.initializeApp(firebaseConfig);
-  var fdb = firebase.firestore();
+  var supabaseUrl = "REPLACE_WITH_YOUR_SUPABASE_URL";
+  var supabaseAnonKey = "REPLACE_WITH_YOUR_SUPABASE_ANON_KEY";
+  var sb = window.supabase.createClient(supabaseUrl, supabaseAnonKey);
 
   var AVATARS = ["🦁","🐑","🕊️","🐘","🐫","🦒","🐢","🦉","🐍","🐟"];
 
@@ -564,10 +556,16 @@
   }
 
   // =====================================================================
-  // DATA LAYER (Firestore)
+  // DATA LAYER (Supabase / Postgres)
   // =====================================================================
-  var profilesCol = fdb.collection("profiles");
-  var configDoc = fdb.collection("config").doc("admin");
+  function normalizeProfile(row){
+    if (!row) return null;
+    var p = Object.assign({}, row, { _id: row.id });
+    if (!p.progress) p.progress = {};
+    if (!p.log) p.log = [];
+    return p;
+  }
+  function throwIfError(error){ if (error) throw error; }
 
   function totalStars(profile){
     var sum = 0;
@@ -577,53 +575,62 @@
 
   var DataLayer = {
     async listProfiles(){
-      var snap = await profilesCol.get();
-      return snap.docs.map(function(d){ var data = d.data(); data._id = d.id; return data; });
+      var res = await sb.from("profiles").select("*");
+      throwIfError(res.error);
+      return res.data.map(normalizeProfile);
     },
     async getProfile(id){
-      var snap = await profilesCol.doc(id).get();
-      return snap.exists ? Object.assign({}, snap.data(), { _id: id }) : null;
+      var res = await sb.from("profiles").select("*").eq("id", id).maybeSingle();
+      throwIfError(res.error);
+      return normalizeProfile(res.data);
     },
     async createProfile(name, avatar, pin){
       var base = slugify(name);
       var id = base;
       var n = 1;
       while (await this.getProfile(id)){ id = base + "-" + (++n); }
-      var doc = { name: name, avatar: avatar, pin: pin, createdAt: Date.now(), updatedAt: Date.now(), progress: {}, log: [] };
-      await profilesCol.doc(id).set(doc);
-      return Object.assign({}, doc, { _id: id });
+      var row = { id: id, name: name, avatar: avatar, pin: pin, created_at: Date.now(), updated_at: Date.now(), progress: {}, log: [] };
+      var res = await sb.from("profiles").insert(row);
+      throwIfError(res.error);
+      return normalizeProfile(row);
     },
     async updateKidPin(id, pin){
-      await profilesCol.doc(id).update({ pin: pin, updatedAt: Date.now() });
+      var res = await sb.from("profiles").update({ pin: pin, updated_at: Date.now() }).eq("id", id);
+      throwIfError(res.error);
     },
     async deleteProfile(id){
-      await profilesCol.doc(id).delete();
+      var res = await sb.from("profiles").delete().eq("id", id);
+      throwIfError(res.error);
     },
     async recordResult(id, lessonId, result){
       var current = await this.getProfile(id);
-      var prev = (current && current.progress && current.progress[lessonId]) || { stars:0, bestWpm:0, bestAccuracy:0 };
+      var prevProgress = (current && current.progress) || {};
+      var prev = prevProgress[lessonId] || { stars:0, bestWpm:0, bestAccuracy:0 };
       var merged = {
         stars: Math.max(prev.stars, result.stars),
         bestWpm: Math.max(prev.bestWpm, result.wpm),
         bestAccuracy: Math.max(prev.bestAccuracy, result.acc)
       };
+      var newProgress = Object.assign({}, prevProgress);
+      newProgress[lessonId] = merged;
       var log = (current && current.log) || [];
       log = log.concat([{
         lessonId: lessonId, lessonTitle: result.lessonTitle, stars: result.stars,
         wpm: result.wpm, acc: result.acc, refs: result.refs || [], at: Date.now()
       }]);
       if (log.length > 40) log = log.slice(log.length - 40);
-      var patch = { updatedAt: Date.now(), log: log };
-      patch["progress." + lessonId] = merged;
-      await profilesCol.doc(id).update(patch);
+      var res = await sb.from("profiles").update({ progress: newProgress, log: log, updated_at: Date.now() }).eq("id", id);
+      throwIfError(res.error);
       return merged;
     },
     async getAdminConfig(){
-      var snap = await configDoc.get();
-      return snap.exists ? snap.data() : null;
+      var res = await sb.from("app_config").select("*").eq("id", "admin").maybeSingle();
+      throwIfError(res.error);
+      return res.data;
     },
     async setAdminPin(pin){
-      await configDoc.set({ pin: pin, updatedAt: Date.now() }, { merge: true });
+      var res = await sb.from("app_config").upsert({ id: "admin", pin: pin, updated_at: Date.now() });
+      throwIfError(res.error);
     }
   };
 
@@ -1173,7 +1180,7 @@
       var stats = computeBoardStats(p);
       var card = document.createElement("div");
       card.className = "keycap dash-card";
-      var updated = p.updatedAt || p.createdAt;
+      var updated = p.updated_at || p.created_at;
       var updatedStr = updated ? new Date(updated).toLocaleDateString(undefined,{month:"short",day:"numeric"}) : "—";
       card.innerHTML =
         '<div class="dash-head"><span class="avatar">' + p.avatar + '</span><div>' +
