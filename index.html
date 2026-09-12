@@ -610,7 +610,7 @@
   function buildText(lesson){
     if (lesson.type === "chars") return generateCharDrill(lesson.keys, lesson.len);
     if (lesson.type === "words") return generateWordLine(lesson.words, lesson.len);
-    if (lesson.type === "passage") return { text: lesson.text, refs: [lesson.ref] };
+    if (lesson.type === "passage") return { text: lesson.ref + ". " + lesson.text, refs: [lesson.ref] };
     return generateSentenceLine(lesson.sentences, lesson.n);
   }
 
