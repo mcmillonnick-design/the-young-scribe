@@ -823,7 +823,7 @@
   }
   function playFanfare(){
     if (!soundEnabled) return;
-    [783.99, 987.77, 1174.66, 1567.98].forEach(function(f, i){ tone(f, i * 0.11, 0.6, "sine", 0.14); });
+    [783.99, 987.77, 1174.66, 1567.98].forEach(function(f, i){ tone(f, i * 0.17, 0.7, "sine", 0.14); });
   }
   function playLevelUp(){
     if (!soundEnabled) return;
@@ -1246,16 +1246,16 @@
     var reduceMotion = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     el.starsRow.querySelectorAll(".star").forEach(function(s, i){
       var n = Number(s.dataset.n);
-      var delay = reduceMotion ? 0 : i * 220;
+      var delay = reduceMotion ? 0 : i * 550;
       setTimeout(function(){
         if (n <= stars){
           s.classList.add("lit");
           if (!reduceMotion) s.classList.add("pop");
-          tone(n === 1 ? 523.25 : n === 2 ? 659.25 : 783.99, 0, 0.4, "triangle", 0.16);
+          tone(n === 1 ? 523.25 : n === 2 ? 659.25 : 783.99, 0, 0.7, "triangle", 0.16);
         }
       }, delay);
     });
-    var afterStars = reduceMotion ? 0 : stars * 220 + 200;
+    var afterStars = reduceMotion ? 0 : stars * 550 + 400;
     setTimeout(function(){
       if (extras.isPersonalBest || extras.justTookFirst) playLevelUp();
       if (stars === 3){
