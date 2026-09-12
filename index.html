@@ -120,7 +120,7 @@
   .progress-fill{ height:100%; background:var(--accent); width:0%; transition:width .15s ease; }
 
   .type-field{ position:relative; background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:26px 24px; }
-  .type-text{ font-family:'Courier Prime',monospace; font-size:clamp(17px,2.8vw,24px); line-height:1.8; letter-spacing:.3px; color:var(--muted); }
+  .type-text{ font-family:'Courier Prime',monospace; font-size:clamp(17px,2.8vw,24px); line-height:1.8; letter-spacing:.3px; color:var(--muted); white-space:normal; overflow-wrap:anywhere; }
   .type-text .ch{ position:relative; }
   .type-text .ch.correct{ color:var(--good); }
   .type-text .ch.incorrect{ color:var(--bad); background:color-mix(in srgb, var(--bad) 18%, transparent); border-radius:3px; }
@@ -243,7 +243,10 @@
           <div class="eyebrow" id="typingEyebrow">Chapter 1</div>
           <h2 id="typingTitle">First Letters</h2>
         </div>
-        <button class="btn-secondary" id="quitLessonBtn" type="button">← Back to the Path</button>
+        <div style="display:flex; gap:10px; flex-wrap:wrap;">
+          <button class="btn-primary" id="finishLessonBtn" type="button">🏁 Finish</button>
+          <button class="btn-secondary" id="quitLessonBtn" type="button">← Back to the Path</button>
+        </div>
       </div>
       <p class="lesson-note" id="lessonNote"></p>
 
@@ -650,7 +653,7 @@
   ["playerBadge","playerAvatar","playerName","playerStars","switchPlayerBtn","leaderboardBtn","parentPortalBtn",
    "screen-kid-login","screen-map","screen-typing","screen-results","screen-leaderboard","screen-admin",
    "loginError","profileGrid",
-   "lessonPath","typingEyebrow","typingTitle","lessonNote","quitLessonBtn",
+   "lessonPath","typingEyebrow","typingTitle","lessonNote","quitLessonBtn","finishLessonBtn",
    "statWpm","statAcc","statTime","statErr","progressFill",
    "typeField","typeText","typeInput","typeOverlay","verseRefs","virtualKeyboard",
    "resultsEyebrow","starsRow","resultsMsg","resWpm","resAcc","resTime","resultsRefs",
@@ -875,7 +878,7 @@
       var cls = "ch";
       if (i < value.length) cls += (value[i] === c ? " correct" : " incorrect");
       else if (i === value.length) cls += " current";
-      var display = c === " " ? "&nbsp;" : c.replace(/&/g,"&amp;").replace(/</g,"&lt;");
+      var display = c.replace(/&/g,"&amp;").replace(/</g,"&lt;");
       html += '<span class="' + cls + '">' + display + '</span>';
     }
     el.typeText.innerHTML = html;
@@ -932,7 +935,7 @@
     var value = el.typeInput.value;
     highlightNextKey(currentText[value.length]);
     tickTimer();
-    if (value === currentText) finishLesson();
+    if (value.length === currentText.length) finishLesson();
   });
 
   async function finishLesson(){
@@ -941,7 +944,7 @@
     clearKeyHighlights();
     var elapsedSec = startTime ? (Date.now() - startTime) / 1000 : 0;
     var minutes = Math.max(elapsedSec / 60, 1/60);
-    var wpm = Math.round((currentText.length / 5) / minutes);
+    var wpm = Math.round((el.typeInput.value.length / 5) / minutes);
     var acc = currentAccuracy();
     var def = currentLesson.def;
     var stars = 0;
@@ -973,6 +976,10 @@
   }
 
   el.quitLessonBtn.addEventListener("click", async function(){ clearInterval(timerInterval); await renderLessonMap(); showScreen("screen-map"); });
+  el.finishLessonBtn.addEventListener("click", function(){
+    if (finished || el.typeInput.value.length === 0) return;
+    finishLesson();
+  });
   el.retryBtn.addEventListener("click", function(){ startLesson(currentLesson.index); });
   el.nextBtn.addEventListener("click", function(){ startLesson(currentLesson.index + 1); });
   el.mapBtn.addEventListener("click", async function(){ await renderLessonMap(); showScreen("screen-map"); });
