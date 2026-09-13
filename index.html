@@ -173,27 +173,46 @@
   .kb-legend i{ width:10px; height:10px; border-radius:3px; display:inline-block; background:var(--dot,var(--accent)); }
   .kb-toolbar{ display:flex; justify-content:flex-end; }
 
-  /* ---- Hand overlay ---- */
+  /* ---- Hand overlay: hands rest naturally over the home row; the finger
+     needed next glows and casts a light trail upward toward its key,
+     rather than the hand shape itself jumping around. ---- */
   .kb-wrap{ position:relative; }
-  .hands-overlay{ position:absolute; inset:0; pointer-events:none; z-index:3; opacity:1; transition:opacity .25s ease; }
+  .hands-overlay{ position:absolute; inset:0; pointer-events:none; z-index:5; opacity:1; transition:opacity .25s ease; }
   .hands-overlay.hands-hidden{ opacity:0; }
-  .hand{ position:absolute; top:8%; width:26%; height:64%; }
-  .hand.hand-left{ left:6%; }
-  .hand.hand-right{ right:6%; }
-  .hand .fingers{ display:flex; justify-content:center; align-items:flex-end; gap:6%; height:66%; }
-  .hand .finger{ flex:1; border-radius:999px 999px 8px 8px; background:color-mix(in srgb, var(--fc,var(--muted)) 42%, transparent); border:1px solid color-mix(in srgb, var(--fc,var(--muted)) 65%, transparent); transition:background .15s ease, border-color .15s ease, box-shadow .15s ease, transform .15s ease; }
-  .hand .finger.len-index{ height:82%; }
+
+  .hand{ position:absolute; top:20%; height:52%; width:29%; }
+  .hand.hand-left{ left:9%; }
+  .hand.hand-right{ left:54%; }
+
+  .hand .palm{ width:78%; height:34%; margin:0 auto; border-radius:38% 38% 46% 46%; background:color-mix(in srgb, var(--ink) 9%, transparent); border:1.5px solid color-mix(in srgb, var(--ink) 16%, transparent); }
+  .hand .fingers{ display:flex; justify-content:center; align-items:flex-end; gap:5%; height:62%; margin-top:-9%; }
+  .hand .finger{ flex:1; position:relative; border-radius:999px 999px 40% 40%; background:color-mix(in srgb, var(--fc,var(--muted)) 28%, transparent); border:1.5px solid color-mix(in srgb, var(--fc,var(--muted)) 55%, transparent); transition:background .18s ease, border-color .18s ease; }
+  .hand .finger.len-index{ height:88%; }
   .hand .finger.len-middle{ height:100%; }
-  .hand .finger.len-ring{ height:90%; }
-  .hand .finger.len-pinky{ height:66%; }
-  .hand .palm{ width:86%; height:36%; margin:0 auto; margin-top:-6%; border-radius:38% 38% 46% 46%; background:color-mix(in srgb, var(--ink) 12%, transparent); border:1px solid color-mix(in srgb, var(--ink) 20%, transparent); }
-  .hand .thumb{ position:absolute; bottom:8%; width:34%; height:20%; border-radius:999px; background:color-mix(in srgb, var(--fc,var(--muted)) 42%, transparent); border:1px solid color-mix(in srgb, var(--fc,var(--muted)) 65%, transparent); transform-origin:bottom center; transition:background .15s ease, border-color .15s ease, box-shadow .15s ease, transform .15s ease; }
-  .hand-left .thumb{ right:-6%; transform:rotate(35deg); }
-  .hand-right .thumb{ left:-6%; transform:rotate(-35deg); }
-  .hand .finger.active{ background:color-mix(in srgb, var(--fc) 85%, transparent); border-color:var(--fc); box-shadow:0 0 14px color-mix(in srgb, var(--fc) 65%, transparent); transform:scale(1.08); }
-  .hand-left .thumb.active{ background:color-mix(in srgb, var(--fc) 85%, transparent); border-color:var(--fc); box-shadow:0 0 14px color-mix(in srgb, var(--fc) 65%, transparent); transform:rotate(35deg) scale(1.08); }
-  .hand-right .thumb.active{ background:color-mix(in srgb, var(--fc) 85%, transparent); border-color:var(--fc); box-shadow:0 0 14px color-mix(in srgb, var(--fc) 65%, transparent); transform:rotate(-35deg) scale(1.08); }
-  @media (prefers-reduced-motion: reduce){ .hand .finger, .hand .thumb, .hands-overlay{ transition:none; } }
+  .hand .finger.len-ring{ height:92%; }
+  .hand .finger.len-pinky{ height:72%; }
+  .hand-left .finger:nth-child(1){ transform:rotate(-9deg); }
+  .hand-left .finger:nth-child(2){ transform:rotate(-3deg); }
+  .hand-left .finger:nth-child(3){ transform:rotate(3deg); }
+  .hand-left .finger:nth-child(4){ transform:rotate(9deg); }
+  .hand-right .finger:nth-child(1){ transform:rotate(-9deg); }
+  .hand-right .finger:nth-child(2){ transform:rotate(-3deg); }
+  .hand-right .finger:nth-child(3){ transform:rotate(3deg); }
+  .hand-right .finger:nth-child(4){ transform:rotate(9deg); }
+
+  .hand .thumb{ position:absolute; bottom:16%; width:36%; height:17%; border-radius:999px; background:color-mix(in srgb, var(--fc,var(--muted)) 28%, transparent); border:1.5px solid color-mix(in srgb, var(--fc,var(--muted)) 55%, transparent); transform-origin:bottom center; transition:background .18s ease, border-color .18s ease; }
+  .hand-left .thumb{ right:-13%; transform:rotate(50deg); }
+  .hand-right .thumb{ left:-13%; transform:rotate(-50deg); }
+
+  .hand .finger.active{ background:color-mix(in srgb, var(--fc) 75%, transparent); border-color:var(--fc); }
+  .hand .finger.active::after{
+    content:""; position:absolute; left:10%; right:10%; top:-60%; height:60%;
+    background:linear-gradient(to top, color-mix(in srgb, var(--fc) 60%, transparent), transparent);
+    filter:blur(2px);
+  }
+  .hand-left .thumb.active{ background:color-mix(in srgb, var(--fc) 75%, transparent); border-color:var(--fc); box-shadow:0 0 14px color-mix(in srgb, var(--fc) 55%, transparent); }
+  .hand-right .thumb.active{ background:color-mix(in srgb, var(--fc) 75%, transparent); border-color:var(--fc); box-shadow:0 0 14px color-mix(in srgb, var(--fc) 55%, transparent); }
+  @media (prefers-reduced-motion: reduce){ .hand .finger, .hand .thumb{ transition:none; } }
 
   /* ---- Results ---- */
   .results-card{ padding:28px 24px; display:flex; flex-direction:column; align-items:center; gap:14px; text-align:center; position:relative; overflow:hidden; }
@@ -391,23 +410,23 @@
       <div class="kb-wrap">
         <div class="hands-overlay" id="handsOverlay">
           <div class="hand hand-left">
+            <div class="palm"></div>
             <div class="fingers">
               <div class="finger len-pinky" data-finger="lp" style="--fc:var(--f-lp)"></div>
               <div class="finger len-ring" data-finger="lr" style="--fc:var(--f-lr)"></div>
               <div class="finger len-middle" data-finger="lm" style="--fc:var(--f-lm)"></div>
               <div class="finger len-index" data-finger="li" style="--fc:var(--f-li)"></div>
             </div>
-            <div class="palm"></div>
             <div class="thumb" data-finger="th" style="--fc:var(--f-th)"></div>
           </div>
           <div class="hand hand-right">
+            <div class="palm"></div>
             <div class="fingers">
               <div class="finger len-index" data-finger="ri" style="--fc:var(--f-ri)"></div>
               <div class="finger len-middle" data-finger="rm" style="--fc:var(--f-rm)"></div>
               <div class="finger len-ring" data-finger="rr" style="--fc:var(--f-rr)"></div>
               <div class="finger len-pinky" data-finger="rp" style="--fc:var(--f-rp)"></div>
             </div>
-            <div class="palm"></div>
             <div class="thumb" data-finger="th" style="--fc:var(--f-th)"></div>
           </div>
         </div>
