@@ -51,9 +51,12 @@
   @keyframes driftC{ 0%,100%{ transform:translate(0,0);} 50%{ transform:translate(4vw,-5vh);} }
   @media (prefers-reduced-motion: reduce){ .ambient span{ animation:none; } }
 
-  .brand-name .drop{ background-image:linear-gradient(100deg, var(--gold) 30%, #fff6d8 50%, var(--gold) 70%); background-size:220% 100%; -webkit-background-clip:text; background-clip:text; color:transparent; animation:shimmer 5s linear infinite; }
+  .brand-name .drop, .shimmer-text{ background-image:linear-gradient(100deg, var(--gold) 30%, #fff6d8 50%, var(--gold) 70%); background-size:220% 100%; -webkit-background-clip:text; background-clip:text; color:transparent; animation:shimmer 5s linear infinite; }
   @keyframes shimmer{ 0%{ background-position:200% 0; } 100%{ background-position:-200% 0; } }
-  @media (prefers-reduced-motion: reduce){ .brand-name .drop{ animation:none; background:none; -webkit-text-fill-color:initial; color:var(--gold); } }
+  @media (prefers-reduced-motion: reduce){ .brand-name .drop, .shimmer-text{ animation:none; background:none; -webkit-text-fill-color:initial; color:var(--gold); } }
+
+  .family-seal{ width:32px; height:32px; border-radius:50%; display:flex; align-items:center; justify-content:center; background:var(--surface-2); border:1.5px solid var(--gold); flex:none; }
+  .family-seal .shimmer-text{ font-family:'Cormorant Garamond',serif; font-weight:700; font-size:17px; }
 
   .app{ max-width:1000px; margin:0 auto; padding:20px 16px 48px; display:flex; flex-direction:column; gap:20px; position:relative; }
 
@@ -61,7 +64,7 @@
   .brand{ display:flex; align-items:baseline; gap:10px; }
   .brand-mark{ font-size:26px; }
   .brand-name{ font-family:'Cormorant Garamond',serif; font-weight:700; font-size:26px; letter-spacing:.2px; }
-  .brand-name .drop{ font-size:1.5em; color:var(--gold); font-weight:700; }
+  .brand-name .drop{ font-size:1.5em; font-weight:700; }
   .nav-actions{ display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
   .player-badge{ display:flex; align-items:center; gap:10px; background:var(--surface); border:1px solid var(--border); border-radius:999px; padding:6px 8px 6px 6px; }
   .avatar{ width:36px; height:36px; border-radius:50%; background:var(--surface-2); display:flex; align-items:center; justify-content:center; font-size:19px; flex:none; }
@@ -83,7 +86,9 @@
   .btn-secondary:active{ transform:translateY(3px); box-shadow:0 0 0 var(--border); }
   .btn-danger{ font-family:'Cormorant Garamond',serif; font-weight:700; font-size:15px; color:var(--bad); background:transparent; border:1px solid var(--bad); border-radius:8px; padding:8px 14px; cursor:pointer; }
 
-  .screen{ display:flex; flex-direction:column; gap:22px; }
+  .screen{ display:flex; flex-direction:column; gap:22px; animation:screenIn .4s ease both; }
+  @keyframes screenIn{ from{ opacity:0; transform:translateY(8px); } to{ opacity:1; transform:translateY(0); } }
+  @media (prefers-reduced-motion: reduce){ .screen{ animation:none; } }
   .eyebrow{ font-family:'Courier Prime',monospace; font-size:12px; letter-spacing:.12em; text-transform:uppercase; color:var(--muted); }
   .error-banner{ background:color-mix(in srgb, var(--bad) 14%, transparent); border:1px solid var(--bad); color:var(--bad); border-radius:10px; padding:12px 16px; font-size:14px; }
 
@@ -112,8 +117,17 @@
   /* ---- Lesson map ---- */
   .lesson-path{ position:relative; display:flex; flex-direction:column; gap:10px; padding-left:30px; }
   .lesson-path::before{ content:""; position:absolute; left:14px; top:6px; bottom:6px; width:2px; background:repeating-linear-gradient(var(--border) 0 6px, transparent 6px 12px); }
-  .lesson-node{ position:relative; padding:12px 16px 12px 14px; display:flex; align-items:center; gap:14px; text-align:left; min-height:auto;
+  .lesson-node{ position:relative; padding:12px 16px 12px 12px; display:flex; align-items:center; gap:14px; text-align:left; min-height:auto;
+    border-left:4px solid color-mix(in srgb, var(--tint,var(--border)) 55%, transparent);
     opacity:0; animation:nodeIn .4s ease forwards; }
+  .era-banner{ display:flex; align-items:center; gap:12px; margin:14px 0 2px -30px; padding:11px 16px 11px 44px; position:relative;
+    background:color-mix(in srgb, var(--tint,var(--gold)) 10%, var(--surface)); border:1px solid color-mix(in srgb, var(--tint,var(--gold)) 38%, var(--border)); border-radius:10px; }
+  .era-banner:first-child{ margin-top:0; }
+  .era-banner::before{ content:""; position:absolute; left:14px; top:50%; transform:translateY(-50%); width:12px; height:12px; border-radius:50%; background:var(--tint,var(--gold)); box-shadow:0 0 0 4px color-mix(in srgb, var(--tint,var(--gold)) 22%, transparent); }
+  .era-icon{ font-size:22px; flex:none; }
+  .era-text{ display:flex; flex-direction:column; gap:1px; min-width:0; }
+  .era-label{ font-family:'Cormorant Garamond',serif; font-weight:700; font-size:16px; color:color-mix(in srgb, var(--tint,var(--gold)) 65%, var(--ink)); }
+  .era-tagline{ font-size:12px; color:var(--muted); font-style:italic; }
   @keyframes nodeIn{ from{ opacity:0; transform:translateX(-8px);} to{ opacity:1; transform:translateX(0);} }
   @media (prefers-reduced-motion: reduce){ .lesson-node{ animation:none; opacity:1; } }
   .lesson-node::before{ content:""; position:absolute; left:-30px; top:50%; transform:translateY(-50%); width:12px; height:12px; border-radius:50%; background:var(--surface); border:2px solid var(--border); }
@@ -257,10 +271,13 @@
   .dash-updated{ font-size:11px; color:var(--muted); }
 
   /* ---- Auth screens (v2) ---- */
+  .auth-flourish{ text-align:center; font-size:26px; color:var(--gold); margin-bottom:-4px; }
   .choice-tiles{ display:flex; gap:16px; flex-wrap:wrap; }
-  .choice-tile{ flex:1; min-width:200px; padding:30px 20px; text-align:center; font-family:'Cormorant Garamond',serif; font-weight:700; font-size:20px; display:flex; flex-direction:column; align-items:center; gap:10px; }
+  .choice-tile{ flex:1; min-width:200px; padding:30px 20px; text-align:center; font-family:'Cormorant Garamond',serif; font-weight:700; font-size:20px; display:flex; flex-direction:column; align-items:center; gap:10px;
+    border:1.5px solid color-mix(in srgb, var(--gold) 40%, var(--border)); box-shadow:0 6px 28px color-mix(in srgb, var(--gold) 10%, transparent); }
   .choice-tile .glyph{ font-size:34px; }
-  .auth-card{ max-width:420px; padding:22px; display:flex; flex-direction:column; gap:12px; }
+  .auth-card{ max-width:420px; padding:24px; display:flex; flex-direction:column; gap:12px;
+    border:1.5px solid color-mix(in srgb, var(--gold) 40%, var(--border)); box-shadow:0 6px 28px color-mix(in srgb, var(--gold) 10%, transparent); }
   .auth-card .text-input{ margin:0; }
 
   [hidden]{ display:none !important; }
@@ -289,12 +306,14 @@
         <button class="ghost-btn" id="leaderboardBtn" type="button">🏆 Leaderboard</button>
       </div>
       <div class="player-badge" id="parentBadge" hidden>
+        <span class="family-seal"><span class="shimmer-text" id="familySealLetter">F</span></span>
         <span class="player-info">
           <span class="player-name" id="parentFamilyLabel">—</span>
         </span>
         <button class="ghost-btn" id="parentPortalBtn" type="button">Parent Portal</button>
       </div>
       <button class="ghost-btn" id="muteBtn" type="button" title="Toggle sound">🔊</button>
+      <button class="ghost-btn" id="musicToggleBtn" type="button" title="Toggle background music">🎵 Music Off</button>
       <button class="ghost-btn" id="switchUserBtn" type="button" hidden>Switch User</button>
     </div>
   </header>
@@ -302,6 +321,7 @@
   <main id="mainArea">
     <!-- LANDING -->
     <section id="screen-landing" class="screen">
+      <div class="auth-flourish">📜</div>
       <div>
         <div class="eyebrow">Welcome</div>
         <h1>Who's using The Young Scribe today?</h1>
@@ -314,6 +334,7 @@
 
     <!-- KID AUTH -->
     <section id="screen-kid-auth" class="screen" hidden>
+      <div class="auth-flourish">✦</div>
       <div>
         <div class="eyebrow">Kid Login</div>
         <h1>Enter your username and password</h1>
@@ -329,6 +350,7 @@
 
     <!-- PARENT AUTH -->
     <section id="screen-parent-auth" class="screen" hidden>
+      <div class="auth-flourish">👪</div>
       <div>
         <div class="eyebrow">Parent Access</div>
         <h1 id="parentAuthTitle">Sign in to your family</h1>
@@ -465,9 +487,12 @@
     <!-- ADMIN PORTAL -->
     <section id="screen-admin" class="screen" hidden>
       <div class="stage-head">
-        <div>
-          <div class="eyebrow">For Parents</div>
-          <h1>Parent Portal</h1>
+        <div style="display:flex; align-items:center; gap:12px;">
+          <span class="family-seal" style="width:44px; height:44px;"><span class="shimmer-text" id="portalSealLetter" style="font-size:22px;">F</span></span>
+          <div>
+            <div class="eyebrow">For Parents</div>
+            <h1>Parent Portal</h1>
+          </div>
         </div>
         <button class="btn-secondary" id="closeAdminBtn" type="button">← Back</button>
       </div>
@@ -742,6 +767,21 @@
       text:"Then I saw a new heaven and a new earth, for the first heaven and the first earth had passed away, and the sea was no more. And I saw the holy city, new Jerusalem, coming down out of heaven from God, prepared as a bride adorned for her husband. And I heard a loud voice from the throne saying, \"Behold, the dwelling place of God is with man. He will dwell with them, and they will be his people, and God himself will be with them as their God. He will wipe away every tear from their eyes, and death shall be no more, neither shall there be mourning, nor crying, nor pain anymore, for the former things have passed away.\"" }
   ];
 
+  // The lesson path reads as a journey through Scripture itself, following
+  // the actual order of the LESSONS array above.
+  var ERAS = [
+    { startIndex:0,  key:"training",   label:"The Scribe's Training", tagline:"Learning the keyboard, one letter at a time.", icon:"🪶", tint:"#B8860B" },
+    { startIndex:8,  key:"beginning",  label:"In the Beginning",      tagline:"Genesis and the Psalms.",                      icon:"🌅", tint:"#A0722E" },
+    { startIndex:11, key:"gospels",    label:"The Gospels",           tagline:"The life and words of Jesus.",                 icon:"🕊️", tint:"#3E7CB1" },
+    { startIndex:27, key:"church",     label:"The Early Church",      tagline:"Letters to the first believers.",              icon:"✉️", tint:"#2F8F6B" },
+    { startIndex:40, key:"revelation", label:"The Promise Fulfilled", tagline:"A new heaven and a new earth.",                icon:"👑", tint:"#C9A227" }
+  ];
+  function eraForIndex(i){
+    var found = ERAS[0];
+    ERAS.forEach(function(e){ if (i >= e.startIndex) found = e; });
+    return found;
+  }
+
   function subtitleFor(lesson){
     if (lesson.type === "chars") return lesson.keys.join(" ").toUpperCase();
     if (lesson.type === "words") return lesson.words.slice(0,3).join(" · ");
@@ -883,7 +923,7 @@
 
   // ---------- element refs ----------
   var el = {};
-  ["playerBadge","playerAvatar","playerName","playerStars","leaderboardBtn","parentBadge","parentFamilyLabel","parentPortalBtn","switchUserBtn","muteBtn",
+  ["playerBadge","playerAvatar","playerName","playerStars","leaderboardBtn","parentBadge","parentFamilyLabel","familySealLetter","portalSealLetter","parentPortalBtn","switchUserBtn","muteBtn","musicToggleBtn",
    "screen-landing","screen-kid-auth","screen-parent-auth","screen-map","screen-typing","screen-results","screen-leaderboard","screen-admin",
    "goKidBtn","goParentBtn",
    "kidUsername","kidPassword","kidAuthError","kidLoginBtn","kidAuthBackBtn",
@@ -959,6 +999,59 @@
   });
   updateMuteIcon();
 
+  // ---------- ambient hymn-style background music ----------
+  // An original, gentle instrumental piece evoking a hymn's warmth — not a
+  // reproduction of a specific hymn (too easy to get a beloved melody's
+  // exact notes wrong from memory, and this can't be listened back to
+  // before shipping). A simple I-vi-IV-V progression, soft sustained pads.
+  var MUSIC_KEY = "theYoungScribe.musicEnabled";
+  var musicEnabled = false;
+  try { var storedMusic = localStorage.getItem(MUSIC_KEY); if (storedMusic !== null) musicEnabled = storedMusic === "1"; } catch(e){}
+  var musicTimer = null;
+  var HYMN_CHORDS = [
+    [293.66, 369.99, 440.00],   // D major
+    [246.94, 293.66, 369.99],   // B minor
+    [196.00, 246.94, 293.66],   // G major
+    [220.00, 277.18, 329.63]    // A major
+  ];
+  var HYMN_CHORD_SECONDS = 4.4;
+  function playHymnChord(freqs, startAt){
+    var ctx = getAudioCtx();
+    if (!ctx) return;
+    freqs.forEach(function(freq){
+      [["sine", 0.05], ["triangle", 0.02]].forEach(function(voice){
+        var osc = ctx.createOscillator();
+        var g = ctx.createGain();
+        osc.type = voice[0];
+        osc.frequency.value = freq;
+        var t0 = ctx.currentTime + startAt;
+        var dur = HYMN_CHORD_SECONDS;
+        g.gain.setValueAtTime(0, t0);
+        g.gain.linearRampToValueAtTime(voice[1], t0 + 1.1);
+        g.gain.linearRampToValueAtTime(voice[1], t0 + dur - 1.3);
+        g.gain.linearRampToValueAtTime(0, t0 + dur);
+        osc.connect(g); g.connect(ctx.destination);
+        osc.start(t0); osc.stop(t0 + dur + 0.1);
+      });
+    });
+  }
+  function scheduleHymnLoop(){
+    if (!musicEnabled) return;
+    HYMN_CHORDS.forEach(function(chord, i){ playHymnChord(chord, i * HYMN_CHORD_SECONDS); });
+    musicTimer = setTimeout(scheduleHymnLoop, HYMN_CHORDS.length * HYMN_CHORD_SECONDS * 1000);
+  }
+  function updateMusicToggle(){
+    el.musicToggleBtn.textContent = musicEnabled ? "🎵 Music On" : "🎵 Music Off";
+    if (musicEnabled && !musicTimer) scheduleHymnLoop();
+    if (!musicEnabled && musicTimer){ clearTimeout(musicTimer); musicTimer = null; }
+  }
+  el.musicToggleBtn.addEventListener("click", function(){
+    musicEnabled = !musicEnabled;
+    try { localStorage.setItem(MUSIC_KEY, musicEnabled ? "1" : "0"); } catch(e){}
+    updateMusicToggle();
+  });
+  updateMusicToggle();
+
   // ---------- confetti ----------
   var CONFETTI_COLORS = ["#B8860B", "#C0392B", "#2F8F6B", "#2E5C9A", "#6B3FA0"];
   function burstConfetti(){
@@ -1032,6 +1125,7 @@
     if (!currentFamily){ el.parentBadge.hidden = true; updateSwitchUserBtn(); return; }
     el.parentBadge.hidden = false;
     el.parentFamilyLabel.textContent = currentFamily.family_name;
+    el.familySealLetter.textContent = (currentFamily.family_name || "?").trim().charAt(0).toUpperCase() || "?";
     updateSwitchUserBtn();
   }
 
@@ -1197,6 +1291,18 @@
     var nextIdx = nextLessonIndex();
     el.lessonPath.innerHTML = "";
     LESSONS.forEach(function(lesson, i){
+      var era = eraForIndex(i);
+      if (era.startIndex === i){
+        var banner = document.createElement("div");
+        banner.className = "era-banner";
+        banner.style.setProperty("--tint", era.tint);
+        banner.innerHTML =
+          '<span class="era-icon">' + era.icon + '</span>' +
+          '<span class="era-text"><span class="era-label"></span><span class="era-tagline"></span></span>';
+        banner.querySelector(".era-label").textContent = era.label;
+        banner.querySelector(".era-tagline").textContent = era.tagline;
+        el.lessonPath.appendChild(banner);
+      }
       var unlocked = isUnlocked(i);
       var prog = currentProfile.progress[lesson.id];
       var stars = prog ? prog.stars : 0;
@@ -1204,6 +1310,7 @@
       node.type = "button";
       node.className = "keycap lesson-node" + (unlocked ? "" : " locked") + (i === nextIdx ? " next" : "") + (stars > 0 ? " done" : "");
       node.style.animationDelay = Math.min(i * 25, 500) + "ms";
+      node.style.setProperty("--tint", era.tint);
       var sealClass = !unlocked ? "s-locked" : stars > 0 ? "s" + stars : "s-open";
       var sealContent = !unlocked ? "🔒" : stars > 0 ? (stars + "★") : String(i + 1);
       node.innerHTML =
@@ -1632,6 +1739,7 @@
 
   function openAdminPortal(){
     el.ownerTabBtn.hidden = !(currentFamily && currentFamily.is_owner);
+    el.portalSealLetter.textContent = ((currentFamily && currentFamily.family_name) || "?").trim().charAt(0).toUpperCase() || "?";
     showScreen("screen-admin");
     renderKidsList();
   }
