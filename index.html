@@ -173,46 +173,28 @@
   .kb-legend i{ width:10px; height:10px; border-radius:3px; display:inline-block; background:var(--dot,var(--accent)); }
   .kb-toolbar{ display:flex; justify-content:flex-end; }
 
-  /* ---- Hand overlay: hands rest naturally over the home row; the finger
-     needed next glows and casts a light trail upward toward its key,
-     rather than the hand shape itself jumping around. ---- */
+  /* ---- Hand overlay: each pad is placed by JavaScript at the exact
+     measured position of its home key (no guessed percentages, so it
+     can't drift out of alignment with the real rendered layout). The
+     active finger glows and casts a light trail upward toward its key. ---- */
   .kb-wrap{ position:relative; }
-  .hands-overlay{ position:absolute; inset:0; pointer-events:none; z-index:5; opacity:1; transition:opacity .25s ease; }
+  .hands-overlay{ position:absolute; inset:0; pointer-events:none; z-index:5; opacity:1; transition:opacity .25s ease; overflow:hidden; }
   .hands-overlay.hands-hidden{ opacity:0; }
-
-  .hand{ position:absolute; top:20%; height:52%; width:29%; }
-  .hand.hand-left{ left:9%; }
-  .hand.hand-right{ left:54%; }
-
-  .hand .palm{ width:78%; height:34%; margin:0 auto; border-radius:38% 38% 46% 46%; background:color-mix(in srgb, var(--ink) 9%, transparent); border:1.5px solid color-mix(in srgb, var(--ink) 16%, transparent); }
-  .hand .fingers{ display:flex; justify-content:center; align-items:flex-end; gap:5%; height:62%; margin-top:-9%; }
-  .hand .finger{ flex:1; position:relative; border-radius:999px 999px 40% 40%; background:color-mix(in srgb, var(--fc,var(--muted)) 28%, transparent); border:1.5px solid color-mix(in srgb, var(--fc,var(--muted)) 55%, transparent); transition:background .18s ease, border-color .18s ease; }
-  .hand .finger.len-index{ height:88%; }
-  .hand .finger.len-middle{ height:100%; }
-  .hand .finger.len-ring{ height:92%; }
-  .hand .finger.len-pinky{ height:72%; }
-  .hand-left .finger:nth-child(1){ transform:rotate(-9deg); }
-  .hand-left .finger:nth-child(2){ transform:rotate(-3deg); }
-  .hand-left .finger:nth-child(3){ transform:rotate(3deg); }
-  .hand-left .finger:nth-child(4){ transform:rotate(9deg); }
-  .hand-right .finger:nth-child(1){ transform:rotate(-9deg); }
-  .hand-right .finger:nth-child(2){ transform:rotate(-3deg); }
-  .hand-right .finger:nth-child(3){ transform:rotate(3deg); }
-  .hand-right .finger:nth-child(4){ transform:rotate(9deg); }
-
-  .hand .thumb{ position:absolute; bottom:16%; width:36%; height:17%; border-radius:999px; background:color-mix(in srgb, var(--fc,var(--muted)) 28%, transparent); border:1.5px solid color-mix(in srgb, var(--fc,var(--muted)) 55%, transparent); transform-origin:bottom center; transition:background .18s ease, border-color .18s ease; }
-  .hand-left .thumb{ right:-13%; transform:rotate(50deg); }
-  .hand-right .thumb{ left:-13%; transform:rotate(-50deg); }
-
-  .hand .finger.active{ background:color-mix(in srgb, var(--fc) 75%, transparent); border-color:var(--fc); }
-  .hand .finger.active::after{
-    content:""; position:absolute; left:10%; right:10%; top:-60%; height:60%;
-    background:linear-gradient(to top, color-mix(in srgb, var(--fc) 60%, transparent), transparent);
+  .finger-pad{
+    position:absolute; left:0; bottom:0; width:26px; height:44px; margin-left:-13px;
+    border-radius:13px 13px 40% 40%; box-sizing:border-box;
+    background:color-mix(in srgb, var(--fc,var(--muted)) 30%, transparent);
+    border:1.5px solid color-mix(in srgb, var(--fc,var(--muted)) 62%, transparent);
+    transition:left .15s ease, bottom .15s ease, background .18s ease, border-color .18s ease;
+  }
+  .finger-pad.thumb-pad{ width:30px; height:22px; margin-left:-15px; border-radius:12px; }
+  .finger-pad.active{ background:color-mix(in srgb, var(--fc) 80%, transparent); border-color:var(--fc); }
+  .finger-pad.active::after{
+    content:""; position:absolute; left:12%; right:12%; bottom:100%; height:65%;
+    background:linear-gradient(to top, color-mix(in srgb, var(--fc) 55%, transparent), transparent);
     filter:blur(2px);
   }
-  .hand-left .thumb.active{ background:color-mix(in srgb, var(--fc) 75%, transparent); border-color:var(--fc); box-shadow:0 0 14px color-mix(in srgb, var(--fc) 55%, transparent); }
-  .hand-right .thumb.active{ background:color-mix(in srgb, var(--fc) 75%, transparent); border-color:var(--fc); box-shadow:0 0 14px color-mix(in srgb, var(--fc) 55%, transparent); }
-  @media (prefers-reduced-motion: reduce){ .hand .finger, .hand .thumb{ transition:none; } }
+  @media (prefers-reduced-motion: reduce){ .finger-pad{ transition:none; } }
 
   /* ---- Results ---- */
   .results-card{ padding:28px 24px; display:flex; flex-direction:column; align-items:center; gap:14px; text-align:center; position:relative; overflow:hidden; }
@@ -409,26 +391,16 @@
 
       <div class="kb-wrap">
         <div class="hands-overlay" id="handsOverlay">
-          <div class="hand hand-left">
-            <div class="palm"></div>
-            <div class="fingers">
-              <div class="finger len-pinky" data-finger="lp" style="--fc:var(--f-lp)"></div>
-              <div class="finger len-ring" data-finger="lr" style="--fc:var(--f-lr)"></div>
-              <div class="finger len-middle" data-finger="lm" style="--fc:var(--f-lm)"></div>
-              <div class="finger len-index" data-finger="li" style="--fc:var(--f-li)"></div>
-            </div>
-            <div class="thumb" data-finger="th" style="--fc:var(--f-th)"></div>
-          </div>
-          <div class="hand hand-right">
-            <div class="palm"></div>
-            <div class="fingers">
-              <div class="finger len-index" data-finger="ri" style="--fc:var(--f-ri)"></div>
-              <div class="finger len-middle" data-finger="rm" style="--fc:var(--f-rm)"></div>
-              <div class="finger len-ring" data-finger="rr" style="--fc:var(--f-rr)"></div>
-              <div class="finger len-pinky" data-finger="rp" style="--fc:var(--f-rp)"></div>
-            </div>
-            <div class="thumb" data-finger="th" style="--fc:var(--f-th)"></div>
-          </div>
+          <div class="finger-pad" data-finger="lp" style="--fc:var(--f-lp)"></div>
+          <div class="finger-pad" data-finger="lr" style="--fc:var(--f-lr)"></div>
+          <div class="finger-pad" data-finger="lm" style="--fc:var(--f-lm)"></div>
+          <div class="finger-pad" data-finger="li" style="--fc:var(--f-li)"></div>
+          <div class="finger-pad" data-finger="ri" style="--fc:var(--f-ri)"></div>
+          <div class="finger-pad" data-finger="rm" style="--fc:var(--f-rm)"></div>
+          <div class="finger-pad" data-finger="rr" style="--fc:var(--f-rr)"></div>
+          <div class="finger-pad" data-finger="rp" style="--fc:var(--f-rp)"></div>
+          <div class="finger-pad thumb-pad" data-finger="th" data-side="l" style="--fc:var(--f-th)"></div>
+          <div class="finger-pad thumb-pad" data-finger="th" data-side="r" style="--fc:var(--f-th)"></div>
         </div>
         <div class="kb" id="virtualKeyboard"></div>
       </div>
@@ -1276,12 +1248,39 @@
   }
   buildKeyboard();
 
+  // Position each finger pad at the exact measured location of its home
+  // key, so alignment never depends on guessing the flex layout's math.
+  var HOME_KEY = { lp:"a", lr:"s", lm:"d", li:"f", ri:"j", rm:"k", rr:"l", rp:";" };
+  function placeFingerPad(fingerId, keyChar, side, xOffset){
+    var overlayRect = el.handsOverlay.getBoundingClientRect();
+    if (!overlayRect.width) return;
+    var keyEl = el.virtualKeyboard.querySelector('.key[data-key="' + keyChar.replace(/["\\]/g,"\\$&") + '"]');
+    if (!keyEl) return;
+    var r = keyEl.getBoundingClientRect();
+    var x = r.left - overlayRect.left + r.width / 2 + (xOffset || 0);
+    var bottomPx = overlayRect.bottom - r.top;
+    var selector = '.finger-pad[data-finger="' + fingerId + '"]' + (side ? '[data-side="' + side + '"]' : ":not([data-side])");
+    el.handsOverlay.querySelectorAll(selector).forEach(function(pad){
+      pad.style.left = x + "px";
+      pad.style.bottom = bottomPx + "px";
+    });
+  }
+  function positionHandsAtRest(){
+    Object.keys(HOME_KEY).forEach(function(f){ placeFingerPad(f, HOME_KEY[f]); });
+    placeFingerPad("th", " ", "l", -20);
+    placeFingerPad("th", " ", "r", 20);
+  }
+  window.addEventListener("resize", function(){
+    if (!el["screen-typing"].hidden) positionHandsAtRest();
+  });
+
   function clearKeyHighlights(){
     el.virtualKeyboard.querySelectorAll(".key.active").forEach(function(k){ k.classList.remove("active","shiftkey"); });
     el.handsOverlay.querySelectorAll(".active").forEach(function(k){ k.classList.remove("active"); });
   }
   function highlightNextKey(ch){
     clearKeyHighlights();
+    positionHandsAtRest();
     if (ch === undefined) return;
     var needsShift = false;
     var base = ch;
@@ -1291,12 +1290,25 @@
     if (keyEl) keyEl.classList.add("active");
     var f = FINGER[base];
     if (f){
+      if (base !== " ") placeFingerPad(f, base);
       el.handsOverlay.querySelectorAll('[data-finger="' + f + '"]').forEach(function(part){ part.classList.add("active"); });
     }
     if (needsShift){
       var shiftId = (f && f.charAt(0) === "l") ? "shiftR" : "shiftL";
       var shiftEl = el.virtualKeyboard.querySelector('.key[data-id="' + shiftId + '"]');
       if (shiftEl) shiftEl.classList.add("active","shiftkey");
+      var shiftFinger = shiftId === "shiftL" ? "lp" : "rp";
+      if (shiftEl){
+        var overlayRect = el.handsOverlay.getBoundingClientRect();
+        var sr = shiftEl.getBoundingClientRect();
+        var sx = sr.left - overlayRect.left + sr.width / 2;
+        var sBottom = overlayRect.bottom - sr.top;
+        el.handsOverlay.querySelectorAll('.finger-pad[data-finger="' + shiftFinger + '"]').forEach(function(pad){
+          pad.style.left = sx + "px";
+          pad.style.bottom = sBottom + "px";
+          pad.classList.add("active");
+        });
+      }
     }
   }
 
@@ -1336,9 +1348,9 @@
     } else { el.verseRefs.hidden = true; }
     renderTypeText();
     updateStats(0, 100, 0);
-    highlightNextKey(currentText[0]);
     if (timerInterval) clearInterval(timerInterval);
     showScreen("screen-typing");
+    highlightNextKey(currentText[0]);
   }
 
   function renderTypeText(){
