@@ -92,7 +92,7 @@ create or replace function v2_complete_signup(p_invite_code text, p_family_name 
 returns void
 language plpgsql
 security definer
-set search_path = public
+set search_path = public, extensions
 as $$
 declare
   v_uid uuid := auth.uid();
@@ -121,7 +121,7 @@ create or replace function v2_generate_invite_code(p_note text)
 returns text
 language plpgsql
 security definer
-set search_path = public
+set search_path = public, extensions
 as $$
 declare
   v_uid uuid := auth.uid();
@@ -142,7 +142,7 @@ create or replace function v2_list_invite_codes()
 returns table(code text, note text, used_by uuid, used_at bigint, created_at bigint)
 language plpgsql
 security definer
-set search_path = public
+set search_path = public, extensions
 as $$
 begin
   if not exists (select 1 from v2_families where id = auth.uid() and is_owner) then
@@ -160,7 +160,7 @@ create or replace function v2_create_kid(p_username text, p_password text, p_nam
 returns uuid
 language plpgsql
 security invoker
-set search_path = public
+set search_path = public, extensions
 as $$
 declare
   v_id uuid := gen_random_uuid();
@@ -177,7 +177,7 @@ create or replace function v2_set_kid_password(p_kid_id uuid, p_new_password tex
 returns void
 language plpgsql
 security invoker
-set search_path = public
+set search_path = public, extensions
 as $$
 begin
   update v2_kids set password_hash = crypt(p_new_password, gen_salt('bf')), updated_at = (extract(epoch from now()) * 1000)::bigint
@@ -194,7 +194,7 @@ create or replace function v2_kid_login(p_username text, p_password text)
 returns jsonb
 language plpgsql
 security definer
-set search_path = public
+set search_path = public, extensions
 as $$
 declare
   v_kid v2_kids;
@@ -221,7 +221,7 @@ create or replace function v2_kid_resume(p_token text)
 returns jsonb
 language plpgsql
 security definer
-set search_path = public
+set search_path = public, extensions
 as $$
 declare
   v_kid v2_kids;
@@ -247,7 +247,7 @@ create or replace function v2_kid_record_result(
 returns jsonb
 language plpgsql
 security definer
-set search_path = public
+set search_path = public, extensions
 as $$
 declare
   v_kid_id uuid;
@@ -290,7 +290,7 @@ create or replace function v2_kid_leaderboard(p_token text)
 returns jsonb
 language plpgsql
 security definer
-set search_path = public
+set search_path = public, extensions
 as $$
 declare
   v_family_id uuid;
