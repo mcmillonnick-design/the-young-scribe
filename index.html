@@ -232,6 +232,13 @@
   .dash-pip.s3{ background:var(--gold); border-color:var(--gold); }
   .dash-updated{ font-size:11px; color:var(--muted); }
 
+  /* ---- Auth screens (v2) ---- */
+  .choice-tiles{ display:flex; gap:16px; flex-wrap:wrap; }
+  .choice-tile{ flex:1; min-width:200px; padding:30px 20px; text-align:center; font-family:'Cormorant Garamond',serif; font-weight:700; font-size:20px; display:flex; flex-direction:column; align-items:center; gap:10px; }
+  .choice-tile .glyph{ font-size:34px; }
+  .auth-card{ max-width:420px; padding:22px; display:flex; flex-direction:column; gap:12px; }
+  .auth-card .text-input{ margin:0; }
+
   [hidden]{ display:none !important; }
 
   @media (max-width:560px){
@@ -256,23 +263,67 @@
           <span class="player-stars" id="playerStars">0 ★</span>
         </span>
         <button class="ghost-btn" id="leaderboardBtn" type="button">🏆 Leaderboard</button>
-        <button class="ghost-btn" id="switchPlayerBtn" type="button">Switch Scribe</button>
+      </div>
+      <div class="player-badge" id="parentBadge" hidden>
+        <span class="player-info">
+          <span class="player-name" id="parentFamilyLabel">—</span>
+        </span>
+        <button class="ghost-btn" id="parentPortalBtn" type="button">Parent Portal</button>
       </div>
       <button class="ghost-btn" id="muteBtn" type="button" title="Toggle sound">🔊</button>
-      <button class="ghost-btn" id="parentPortalBtn" type="button">Parent Portal</button>
+      <button class="ghost-btn" id="switchUserBtn" type="button" hidden>Switch User</button>
     </div>
   </header>
 
   <main id="mainArea">
-    <!-- KID LOGIN -->
-    <section id="screen-kid-login" class="screen">
+    <!-- LANDING -->
+    <section id="screen-landing" class="screen">
       <div>
-        <div class="eyebrow">Begin</div>
-        <h1>Who is scribing today?</h1>
+        <div class="eyebrow">Welcome</div>
+        <h1>Who's using The Young Scribe today?</h1>
       </div>
-      <div id="loginError" class="error-banner" hidden></div>
-      <div class="profile-grid" id="profileGrid"></div>
-      <p style="color:var(--muted); font-size:14px;">Don't see your name? Ask a parent to add you in the Parent Portal.</p>
+      <div class="choice-tiles">
+        <button class="keycap choice-tile" id="goKidBtn" type="button"><span class="glyph">🧒</span>I'm a Kid</button>
+        <button class="keycap choice-tile" id="goParentBtn" type="button"><span class="glyph">👪</span>I'm a Parent</button>
+      </div>
+    </section>
+
+    <!-- KID AUTH -->
+    <section id="screen-kid-auth" class="screen" hidden>
+      <div>
+        <div class="eyebrow">Kid Login</div>
+        <h1>Enter your username and password</h1>
+      </div>
+      <div class="keycap auth-card">
+        <input class="text-input" id="kidUsername" placeholder="Username" autocomplete="username" />
+        <input class="text-input" id="kidPassword" type="password" placeholder="Password" autocomplete="current-password" />
+        <p class="modal-error" id="kidAuthError"></p>
+        <button class="btn-primary" id="kidLoginBtn" type="button">Log In</button>
+        <button class="ghost-btn" id="kidAuthBackBtn" type="button">← Back</button>
+      </div>
+    </section>
+
+    <!-- PARENT AUTH -->
+    <section id="screen-parent-auth" class="screen" hidden>
+      <div>
+        <div class="eyebrow">Parent Access</div>
+        <h1 id="parentAuthTitle">Sign in to your family</h1>
+      </div>
+      <div class="board-tabs">
+        <button class="board-tab active" data-mode="signin" type="button">Sign In</button>
+        <button class="board-tab" data-mode="signup" type="button">Create a Family</button>
+      </div>
+      <div class="keycap auth-card">
+        <input class="text-input" id="parentEmail" type="email" placeholder="Email" autocomplete="email" />
+        <input class="text-input" id="parentPassword" type="password" placeholder="Password" autocomplete="current-password" />
+        <input class="text-input" id="parentFamilyName" placeholder="Family name (e.g. The Johnsons)" hidden />
+        <input class="text-input" id="parentInviteCode" placeholder="Invite code" hidden />
+        <input class="text-input" id="parentAdminPin" placeholder="Choose a Parent Portal PIN (4+ digits)" inputmode="numeric" hidden />
+        <p class="modal-error" id="parentAuthError"></p>
+        <p style="font-size:13px; color:var(--muted); margin:0;" id="parentAuthHint" hidden></p>
+        <button class="btn-primary" id="parentAuthSubmit" type="button">Sign In</button>
+        <button class="ghost-btn" id="parentAuthBackBtn" type="button">← Back</button>
+      </div>
     </section>
 
     <!-- LESSON MAP -->
@@ -383,6 +434,7 @@
         <button class="board-tab active" data-tab="kids" type="button">Manage Scribes</button>
         <button class="board-tab" data-tab="progress" type="button">Progress</button>
         <button class="board-tab" data-tab="settings" type="button">Settings</button>
+        <button class="board-tab" data-tab="owner" type="button" id="ownerTabBtn" hidden>Owner Console</button>
       </div>
 
       <div class="admin-panel" id="adminKidsPanel">
@@ -391,7 +443,8 @@
           <h3>Add a new scribe</h3>
           <input class="text-input" id="newKidName" maxlength="16" placeholder="Kid's name" autocomplete="off" />
           <div class="avatar-pick" id="avatarPick"></div>
-          <input class="text-input" id="newKidPin" maxlength="4" inputmode="numeric" placeholder="4-digit PIN for them to log in" autocomplete="off" />
+          <input class="text-input" id="newKidUsername" maxlength="20" placeholder="Username (unique across all families)" autocomplete="off" />
+          <input class="text-input" id="newKidPassword" maxlength="30" placeholder="Password" autocomplete="off" />
           <button class="btn-primary" id="addKidBtn" type="button">Add Scribe</button>
           <p class="modal-error" id="addKidError"></p>
         </div>
@@ -403,11 +456,25 @@
 
       <div class="admin-panel" id="adminSettingsPanel" hidden>
         <div class="keycap add-kid-form">
-          <h3>Change parent PIN</h3>
+          <h3>Change Parent Portal PIN</h3>
           <input class="text-input" id="newParentPin" maxlength="8" inputmode="numeric" placeholder="New parent PIN (4+ digits)" autocomplete="off" />
           <button class="btn-secondary" id="changeParentPinBtn" type="button">Update PIN</button>
           <p class="modal-error" id="parentPinError"></p>
         </div>
+        <div class="keycap add-kid-form">
+          <h3>Sign out</h3>
+          <button class="btn-secondary" id="parentSignOutBtn" type="button">Sign out of this family</button>
+        </div>
+      </div>
+
+      <div class="admin-panel" id="adminOwnerPanel" hidden>
+        <div class="keycap add-kid-form">
+          <h3>Generate an invite code</h3>
+          <input class="text-input" id="inviteNote" maxlength="60" placeholder="Note (e.g. \"The Johnsons\")" autocomplete="off" />
+          <button class="btn-primary" id="generateInviteBtn" type="button">Generate Code</button>
+          <p class="modal-error" id="inviteError"></p>
+        </div>
+        <div id="inviteList" style="display:flex; flex-direction:column; gap:8px;"></div>
       </div>
     </section>
   </main>
@@ -416,27 +483,12 @@
   </footer>
 </div>
 
-<!-- Kid PIN modal -->
-<div class="modal-backdrop" id="pinModalBackdrop" hidden>
-  <div class="modal-card">
-    <span class="avatar" id="pinModalAvatar" style="width:56px;height:56px;font-size:30px;margin:0 auto;">🦁</span>
-    <h3 id="pinModalName">Enter your PIN</h3>
-    <input class="pin-input" id="pinModalInput" type="password" inputmode="numeric" maxlength="4" autocomplete="off" />
-    <p class="modal-error" id="pinModalError"></p>
-    <div class="modal-actions">
-      <button class="btn-primary" id="pinModalSubmit" type="button">Go</button>
-      <button class="ghost-btn" id="pinModalCancel" type="button">Cancel</button>
-    </div>
-  </div>
-</div>
-
 <!-- Parent gate modal -->
 <div class="modal-backdrop" id="parentGateBackdrop" hidden>
   <div class="modal-card">
-    <h3 id="parentGateTitle">Parent PIN</h3>
-    <p id="parentGateHint" style="font-size:13px; color:var(--muted); margin:0;"></p>
+    <h3 id="parentGateTitle">Parent Portal PIN</h3>
+    <p style="font-size:13px; color:var(--muted); margin:0;">Enter your Parent Portal PIN to continue.</p>
     <input class="pin-input" id="parentGateInput" type="password" inputmode="numeric" maxlength="8" autocomplete="off" />
-    <input class="pin-input" id="parentGateConfirm" type="password" inputmode="numeric" maxlength="8" autocomplete="off" hidden placeholder="confirm" />
     <p class="modal-error" id="parentGateError"></p>
     <div class="modal-actions">
       <button class="btn-primary" id="parentGateSubmit" type="button">Enter</button>
@@ -670,20 +722,9 @@
     0: ["Slow and steady — try again with care.","Take your time copying each word."]
   };
 
-  function slugify(name){
-    return name.toLowerCase().trim().replace(/[^a-z0-9]+/g,"-").replace(/^-+|-+$/g,"") || "scribe";
-  }
-
   // =====================================================================
   // DATA LAYER (Supabase / Postgres)
   // =====================================================================
-  function normalizeProfile(row){
-    if (!row) return null;
-    var p = Object.assign({}, row, { _id: row.id });
-    if (!p.progress) p.progress = {};
-    if (!p.log) p.log = [];
-    return p;
-  }
   function throwIfError(error){ if (error) throw error; }
 
   function totalStars(profile){
@@ -691,65 +732,99 @@
     Object.keys((profile && profile.progress) || {}).forEach(function(id){ sum += (profile.progress[id].stars || 0); });
     return sum;
   }
+  function normalizeKidRow(row){
+    if (!row) return null;
+    var p = Object.assign({}, row, { _id: row.id });
+    if (!p.progress) p.progress = {};
+    if (!p.log) p.log = [];
+    return p;
+  }
+
+  var KID_TOKEN_KEY = "theYoungScribe.kidToken";
 
   var DataLayer = {
-    async listProfiles(){
-      var res = await sb.from("profiles").select("*");
-      throwIfError(res.error);
-      return res.data.map(normalizeProfile);
+    kid: {
+      async login(username, password){
+        var res = await sb.rpc("v2_kid_login", { p_username: username, p_password: password });
+        throwIfError(res.error);
+        return res.data;
+      },
+      async resume(token){
+        var res = await sb.rpc("v2_kid_resume", { p_token: token });
+        throwIfError(res.error);
+        return res.data;
+      },
+      async recordResult(token, lessonId, result){
+        var res = await sb.rpc("v2_kid_record_result", {
+          p_token: token, p_lesson_id: lessonId, p_lesson_title: result.lessonTitle,
+          p_stars: result.stars, p_wpm: result.wpm, p_acc: result.acc, p_refs: result.refs || []
+        });
+        throwIfError(res.error);
+        return res.data;
+      },
+      async leaderboard(token){
+        var res = await sb.rpc("v2_kid_leaderboard", { p_token: token });
+        throwIfError(res.error);
+        return res.data || [];
+      }
     },
-    async getProfile(id){
-      var res = await sb.from("profiles").select("*").eq("id", id).maybeSingle();
-      throwIfError(res.error);
-      return normalizeProfile(res.data);
-    },
-    async createProfile(name, avatar, pin){
-      var base = slugify(name);
-      var id = base;
-      var n = 1;
-      while (await this.getProfile(id)){ id = base + "-" + (++n); }
-      var row = { id: id, name: name, avatar: avatar, pin: pin, created_at: Date.now(), updated_at: Date.now(), progress: {}, log: [] };
-      var res = await sb.from("profiles").insert(row);
-      throwIfError(res.error);
-      return normalizeProfile(row);
-    },
-    async updateKidPin(id, pin){
-      var res = await sb.from("profiles").update({ pin: pin, updated_at: Date.now() }).eq("id", id);
-      throwIfError(res.error);
-    },
-    async deleteProfile(id){
-      var res = await sb.from("profiles").delete().eq("id", id);
-      throwIfError(res.error);
-    },
-    async recordResult(id, lessonId, result){
-      var current = await this.getProfile(id);
-      var prevProgress = (current && current.progress) || {};
-      var prev = prevProgress[lessonId] || { stars:0, bestWpm:0, bestAccuracy:0 };
-      var merged = {
-        stars: Math.max(prev.stars, result.stars),
-        bestWpm: Math.max(prev.bestWpm, result.wpm),
-        bestAccuracy: Math.max(prev.bestAccuracy, result.acc)
-      };
-      var newProgress = Object.assign({}, prevProgress);
-      newProgress[lessonId] = merged;
-      var log = (current && current.log) || [];
-      log = log.concat([{
-        lessonId: lessonId, lessonTitle: result.lessonTitle, stars: result.stars,
-        wpm: result.wpm, acc: result.acc, refs: result.refs || [], at: Date.now()
-      }]);
-      if (log.length > 40) log = log.slice(log.length - 40);
-      var res = await sb.from("profiles").update({ progress: newProgress, log: log, updated_at: Date.now() }).eq("id", id);
-      throwIfError(res.error);
-      return { merged: merged, prev: prev };
-    },
-    async getAdminConfig(){
-      var res = await sb.from("app_config").select("*").eq("id", "admin").maybeSingle();
-      throwIfError(res.error);
-      return res.data;
-    },
-    async setAdminPin(pin){
-      var res = await sb.from("app_config").upsert({ id: "admin", pin: pin, updated_at: Date.now() });
-      throwIfError(res.error);
+    parent: {
+      async signUp(email, password){
+        var res = await sb.auth.signUp({ email: email, password: password });
+        throwIfError(res.error);
+        return res.data;
+      },
+      async signIn(email, password){
+        var res = await sb.auth.signInWithPassword({ email: email, password: password });
+        throwIfError(res.error);
+        return res.data;
+      },
+      async signOut(){ await sb.auth.signOut(); },
+      async getSession(){
+        var res = await sb.auth.getSession();
+        return res.data ? res.data.session : null;
+      },
+      async completeSignup(inviteCode, familyName, adminPin){
+        var res = await sb.rpc("v2_complete_signup", { p_invite_code: inviteCode, p_family_name: familyName, p_admin_pin: adminPin });
+        throwIfError(res.error);
+      },
+      async getFamily(uid){
+        var res = await sb.from("v2_families").select("*").eq("id", uid).maybeSingle();
+        throwIfError(res.error);
+        return res.data;
+      },
+      async setAdminPin(uid, pin){
+        var res = await sb.from("v2_families").update({ admin_pin: pin }).eq("id", uid);
+        throwIfError(res.error);
+      },
+      async listKids(uid){
+        var res = await sb.from("v2_kids").select("*").eq("family_id", uid);
+        throwIfError(res.error);
+        return (res.data || []).map(normalizeKidRow);
+      },
+      async createKid(username, password, name, avatar){
+        var res = await sb.rpc("v2_create_kid", { p_username: username, p_password: password, p_name: name, p_avatar: avatar });
+        throwIfError(res.error);
+        return res.data;
+      },
+      async setKidPassword(kidId, newPassword){
+        var res = await sb.rpc("v2_set_kid_password", { p_kid_id: kidId, p_new_password: newPassword });
+        throwIfError(res.error);
+      },
+      async deleteKid(kidId){
+        var res = await sb.from("v2_kids").delete().eq("id", kidId);
+        throwIfError(res.error);
+      },
+      async generateInviteCode(note){
+        var res = await sb.rpc("v2_generate_invite_code", { p_note: note });
+        throwIfError(res.error);
+        return res.data;
+      },
+      async listInviteCodes(){
+        var res = await sb.rpc("v2_list_invite_codes");
+        throwIfError(res.error);
+        return res.data || [];
+      }
     }
   };
 
@@ -762,28 +837,30 @@
   var keystrokes = 0;
   var mistakes = 0;
   var finished = false;
-  var isParentAuthed = false;
   var threeStarStreak = 0;
+  var currentFamily = null; // {id, family_name, admin_pin, is_owner} when a parent is signed in
 
   // ---------- element refs ----------
   var el = {};
-  ["playerBadge","playerAvatar","playerName","playerStars","switchPlayerBtn","leaderboardBtn","parentPortalBtn","muteBtn",
-   "screen-kid-login","screen-map","screen-typing","screen-results","screen-leaderboard","screen-admin",
-   "loginError","profileGrid",
+  ["playerBadge","playerAvatar","playerName","playerStars","leaderboardBtn","parentBadge","parentFamilyLabel","parentPortalBtn","switchUserBtn","muteBtn",
+   "screen-landing","screen-kid-auth","screen-parent-auth","screen-map","screen-typing","screen-results","screen-leaderboard","screen-admin",
+   "goKidBtn","goParentBtn",
+   "kidUsername","kidPassword","kidAuthError","kidLoginBtn","kidAuthBackBtn",
+   "parentAuthTitle","parentEmail","parentPassword","parentFamilyName","parentInviteCode","parentAdminPin","parentAuthError","parentAuthHint","parentAuthSubmit","parentAuthBackBtn",
    "lessonPath","typingEyebrow","typingTitle","lessonNote","quitLessonBtn","finishLessonBtn",
    "statWpm","statAcc","statTime","statErr","progressFill",
    "typeField","typeText","typeInput","typeOverlay","verseRefs","virtualKeyboard",
    "resultsEyebrow","starsRow","resultsMsg","resWpm","resAcc","resTime","resultsRefs","badgeRow",
    "retryBtn","nextBtn","mapBtn",
    "boardTabs","boardRows","closeLeaderboardBtn",
-   "closeAdminBtn","kidsList","newKidName","avatarPick","newKidPin","addKidBtn","addKidError",
-   "dashGrid","newParentPin","changeParentPinBtn","parentPinError",
-   "pinModalBackdrop","pinModalAvatar","pinModalName","pinModalInput","pinModalError","pinModalSubmit","pinModalCancel",
-   "parentGateBackdrop","parentGateTitle","parentGateHint","parentGateInput","parentGateConfirm","parentGateError","parentGateSubmit","parentGateCancel"
+   "closeAdminBtn","kidsList","newKidName","avatarPick","newKidUsername","newKidPassword","addKidBtn","addKidError",
+   "dashGrid","newParentPin","changeParentPinBtn","parentPinError","parentSignOutBtn",
+   "ownerTabBtn","inviteNote","generateInviteBtn","inviteError","inviteList",
+   "parentGateBackdrop","parentGateTitle","parentGateInput","parentGateError","parentGateSubmit","parentGateCancel"
   ].forEach(function(id){ el[id] = document.getElementById(id); });
 
-  var SCREENS = ["screen-kid-login","screen-map","screen-typing","screen-results","screen-leaderboard","screen-admin"];
-  var lastScreen = "screen-kid-login";
+  var SCREENS = ["screen-landing","screen-kid-auth","screen-parent-auth","screen-map","screen-typing","screen-results","screen-leaderboard","screen-admin"];
+  var lastScreen = "screen-landing";
 
   function showScreen(name){
     var current = SCREENS.find(function(s){ return !el[s].hidden; });
@@ -894,83 +971,166 @@
   }
 
   // =====================================================================
-  // KID LOGIN
+  // LANDING + AUTH
   // =====================================================================
-  async function renderProfileGrid(){
-    el.profileGrid.innerHTML = '<p style="color:var(--muted);">Loading scribes…</p>';
-    el.loginError.hidden = true;
-    try {
-      var profiles = await DataLayer.listProfiles();
-      el.profileGrid.innerHTML = "";
-      profiles.forEach(function(p){
-        var card = document.createElement("button");
-        card.type = "button";
-        card.className = "keycap profile-card";
-        card.innerHTML =
-          '<span class="avatar">' + p.avatar + '</span>' +
-          '<span class="pname"></span>' +
-          '<span class="pstars">' + totalStars(p) + ' ★</span>';
-        card.querySelector(".pname").textContent = p.name;
-        card.addEventListener("click", function(){ openPinModal(p); });
-        el.profileGrid.appendChild(card);
-      });
-    } catch(e){
-      el.profileGrid.innerHTML = "";
-      el.loginError.hidden = false;
-      el.loginError.textContent = "Couldn't reach the scribe list. Check your internet connection and try again.";
+  var PENDING_SIGNUP_KEY = "theYoungScribe.pendingSignup";
+
+  function updateSwitchUserBtn(){
+    el.switchUserBtn.hidden = !(currentProfile || currentFamily);
+  }
+
+  function updatePlayerBadge(){
+    if (!currentProfile){ el.playerBadge.hidden = true; updateSwitchUserBtn(); return; }
+    el.playerBadge.hidden = false;
+    el.playerAvatar.textContent = currentProfile.avatar;
+    el.playerName.textContent = currentProfile.name;
+    el.playerStars.textContent = totalStars(currentProfile) + " ★";
+    updateSwitchUserBtn();
+  }
+  function updateParentBadge(){
+    if (!currentFamily){ el.parentBadge.hidden = true; updateSwitchUserBtn(); return; }
+    el.parentBadge.hidden = false;
+    el.parentFamilyLabel.textContent = currentFamily.family_name;
+    updateSwitchUserBtn();
+  }
+
+  el.switchUserBtn.addEventListener("click", async function(){
+    if (currentProfile){
+      currentProfile = null;
+      try { localStorage.removeItem(KID_TOKEN_KEY); } catch(e){}
+      updatePlayerBadge();
     }
-  }
-
-  function openPinModal(profile){
-    el.pinModalAvatar.textContent = profile.avatar;
-    el.pinModalName.textContent = "Enter " + profile.name + "'s PIN";
-    el.pinModalInput.value = "";
-    el.pinModalError.textContent = "";
-    el.pinModalBackdrop.hidden = false;
-    el.pinModalInput.focus();
-    el.pinModalBackdrop.dataset.profileId = profile._id;
-  }
-  function closePinModal(){ el.pinModalBackdrop.hidden = true; }
-
-  async function submitPin(){
-    var id = el.pinModalBackdrop.dataset.profileId;
-    var entered = el.pinModalInput.value.trim();
-    var profile = await DataLayer.getProfile(id);
-    if (!profile){ el.pinModalError.textContent = "That profile no longer exists."; return; }
-    if (entered !== String(profile.pin)){
-      el.pinModalError.textContent = "That's not the right PIN. Try again.";
-      el.pinModalInput.value = "";
-      el.pinModalInput.focus();
-      return;
+    if (currentFamily){
+      currentFamily = null;
+      try { await DataLayer.parent.signOut(); } catch(e){}
+      updateParentBadge();
     }
-    closePinModal();
-    await enterProfile(profile);
-  }
-  el.pinModalSubmit.addEventListener("click", submitPin);
-  el.pinModalCancel.addEventListener("click", closePinModal);
-  el.pinModalInput.addEventListener("keydown", function(e){ if (e.key === "Enter") submitPin(); });
+    showScreen("screen-landing");
+  });
 
-  async function enterProfile(profile){
-    currentProfile = profile;
+  // ---- kid login ----
+  el.goKidBtn.addEventListener("click", function(){
+    el.kidUsername.value = ""; el.kidPassword.value = ""; el.kidAuthError.textContent = "";
+    showScreen("screen-kid-auth");
+    el.kidUsername.focus();
+  });
+  el.kidAuthBackBtn.addEventListener("click", function(){ showScreen("screen-landing"); });
+
+  async function enterKidSession(data){
+    currentProfile = { _id: data.kidId, token: data.token, family_id: data.familyId, name: data.name, avatar: data.avatar, progress: data.progress || {}, log: data.log || [] };
     updatePlayerBadge();
     await renderLessonMap();
     showScreen("screen-map");
   }
 
-  function updatePlayerBadge(){
-    if (!currentProfile){ el.playerBadge.hidden = true; return; }
-    el.playerBadge.hidden = false;
-    el.playerAvatar.textContent = currentProfile.avatar;
-    el.playerName.textContent = currentProfile.name;
-    el.playerStars.textContent = totalStars(currentProfile) + " ★";
+  async function submitKidLogin(){
+    var username = el.kidUsername.value.trim();
+    var password = el.kidPassword.value;
+    el.kidAuthError.textContent = "";
+    if (!username || !password){ el.kidAuthError.textContent = "Enter your username and password."; return; }
+    el.kidLoginBtn.disabled = true;
+    try {
+      var data = await DataLayer.kid.login(username, password);
+      if (!data){ el.kidAuthError.textContent = "That username or password isn't right."; return; }
+      try { localStorage.setItem(KID_TOKEN_KEY, data.token); } catch(e){}
+      await enterKidSession(data);
+    } catch(e){
+      el.kidAuthError.textContent = "Couldn't log in — check your connection and try again.";
+    } finally {
+      el.kidLoginBtn.disabled = false;
+    }
+  }
+  el.kidLoginBtn.addEventListener("click", submitKidLogin);
+  el.kidPassword.addEventListener("keydown", function(e){ if (e.key === "Enter") submitKidLogin(); });
+
+  // ---- parent sign in / sign up ----
+  var parentAuthMode = "signin";
+  function setParentAuthMode(mode){
+    parentAuthMode = mode;
+    document.querySelectorAll('#screen-parent-auth .board-tab').forEach(function(t){ t.classList.toggle("active", t.dataset.mode === mode); });
+    var isSignup = mode === "signup";
+    el.parentAuthTitle.textContent = isSignup ? "Create your family" : "Sign in to your family";
+    el.parentFamilyName.hidden = !isSignup;
+    el.parentInviteCode.hidden = !isSignup;
+    el.parentAdminPin.hidden = !isSignup;
+    el.parentAuthSubmit.textContent = isSignup ? "Create Family" : "Sign In";
+    el.parentAuthError.textContent = "";
+    el.parentAuthHint.hidden = true;
+  }
+  document.querySelectorAll('#screen-parent-auth .board-tab').forEach(function(tab){
+    tab.addEventListener("click", function(){ setParentAuthMode(tab.dataset.mode); });
+  });
+  el.goParentBtn.addEventListener("click", function(){
+    el.parentEmail.value = ""; el.parentPassword.value = ""; el.parentFamilyName.value = ""; el.parentInviteCode.value = ""; el.parentAdminPin.value = "";
+    setParentAuthMode("signin");
+    showScreen("screen-parent-auth");
+    el.parentEmail.focus();
+  });
+  el.parentAuthBackBtn.addEventListener("click", function(){ showScreen("screen-landing"); });
+
+  async function enterParentSession(uid, family){
+    if (!family) family = await DataLayer.parent.getFamily(uid);
+    currentFamily = family;
+    updateParentBadge();
+    showScreen("screen-landing");
+    openParentPortalFlow();
   }
 
-  el.switchPlayerBtn.addEventListener("click", function(){
-    currentProfile = null;
-    updatePlayerBadge();
-    renderProfileGrid();
-    showScreen("screen-kid-login");
-  });
+  async function finishParentSignIn(uid){
+    var family = await DataLayer.parent.getFamily(uid);
+    if (!family){
+      var pending = null;
+      try { var raw = localStorage.getItem(PENDING_SIGNUP_KEY); if (raw) pending = JSON.parse(raw); } catch(e){}
+      if (pending){
+        await DataLayer.parent.completeSignup(pending.inviteCode, pending.familyName, pending.adminPin);
+        try { localStorage.removeItem(PENDING_SIGNUP_KEY); } catch(e){}
+        family = await DataLayer.parent.getFamily(uid);
+      } else {
+        el.parentAuthError.textContent = "Your email is confirmed, but your family setup wasn't finished. Enter your family details and use \"Create Family\" again.";
+        setParentAuthMode("signup");
+        showScreen("screen-parent-auth");
+        return;
+      }
+    }
+    await enterParentSession(uid, family);
+  }
+
+  async function submitParentAuth(){
+    var email = el.parentEmail.value.trim();
+    var password = el.parentPassword.value;
+    el.parentAuthError.textContent = "";
+    el.parentAuthHint.hidden = true;
+    if (!email || !password){ el.parentAuthError.textContent = "Enter your email and password."; return; }
+    el.parentAuthSubmit.disabled = true;
+    try {
+      if (parentAuthMode === "signup"){
+        var familyName = el.parentFamilyName.value.trim();
+        var inviteCode = el.parentInviteCode.value.trim();
+        var adminPin = el.parentAdminPin.value.trim();
+        if (!familyName || !inviteCode || adminPin.length < 4){
+          el.parentAuthError.textContent = "Fill in your family name, invite code, and a PIN of at least 4 digits.";
+          return;
+        }
+        var signUpData = await DataLayer.parent.signUp(email, password);
+        if (signUpData.session){
+          await DataLayer.parent.completeSignup(inviteCode, familyName, adminPin);
+          await enterParentSession(signUpData.session.user.id);
+        } else {
+          try { localStorage.setItem(PENDING_SIGNUP_KEY, JSON.stringify({ inviteCode: inviteCode, familyName: familyName, adminPin: adminPin })); } catch(e){}
+          el.parentAuthHint.hidden = false;
+          el.parentAuthHint.textContent = "Almost there — check your email to confirm your account, then come back and sign in.";
+        }
+      } else {
+        var signInData = await DataLayer.parent.signIn(email, password);
+        await finishParentSignIn(signInData.session.user.id);
+      }
+    } catch(e){
+      el.parentAuthError.textContent = (e && e.message) ? e.message : "Something went wrong — try again.";
+    } finally {
+      el.parentAuthSubmit.disabled = false;
+    }
+  }
+  el.parentAuthSubmit.addEventListener("click", submitParentAuth);
 
   // =====================================================================
   // LESSON MAP
@@ -990,8 +1150,8 @@
   }
 
   async function renderLessonMap(){
-    var fresh = await DataLayer.getProfile(currentProfile._id);
-    if (fresh) currentProfile = fresh;
+    var fresh = await DataLayer.kid.resume(currentProfile.token);
+    if (fresh) currentProfile = { _id: fresh.kidId, token: fresh.token, family_id: fresh.familyId, name: fresh.name, avatar: fresh.avatar, progress: fresh.progress || {}, log: fresh.log || [] };
     updatePlayerBadge();
     var nextIdx = nextLessonIndex();
     el.lessonPath.innerHTML = "";
@@ -1163,7 +1323,7 @@
   });
 
   function rankOf(profiles, id){
-    var rows = profiles.map(function(p){ return { id: p._id, stars: computeBoardStats(p).stars }; });
+    var rows = profiles.map(function(p){ return { id: p._id || p.id, stars: computeBoardStats(p).stars }; });
     rows.sort(function(a,b){ return b.stars - a.stars; });
     for (var i = 0; i < rows.length; i++){ if (rows[i].id === id) return i + 1; }
     return null;
@@ -1183,26 +1343,28 @@
     else if (acc >= 92 && wpm >= def.targetWpm * 0.6) stars = 2;
     else if (acc >= 80) stars = 1;
 
+    var prevEntry = currentProfile.progress[def.id] || { stars:0, bestWpm:0, bestAccuracy:0 };
+
     var rankBefore = null;
     try {
-      var profilesBefore = await DataLayer.listProfiles();
-      rankBefore = rankOf(profilesBefore, currentProfile._id);
+      var boardBefore = await DataLayer.kid.leaderboard(currentProfile.token);
+      rankBefore = rankOf(boardBefore, currentProfile._id);
     } catch(e){}
 
-    var outcome = await DataLayer.recordResult(currentProfile._id, def.id, { stars: stars, wpm: wpm, acc: acc, lessonTitle: def.title, refs: currentRefs });
-    currentProfile.progress[def.id] = outcome.merged;
+    var merged = await DataLayer.kid.recordResult(currentProfile.token, def.id, { stars: stars, wpm: wpm, acc: acc, lessonTitle: def.title, refs: currentRefs });
+    currentProfile.progress[def.id] = merged;
     updatePlayerBadge();
 
-    var hadPriorAttempt = outcome.prev.bestWpm > 0 || outcome.prev.stars > 0;
-    var isPersonalBest = hadPriorAttempt && wpm > outcome.prev.bestWpm;
+    var hadPriorAttempt = prevEntry.bestWpm > 0 || prevEntry.stars > 0;
+    var isPersonalBest = hadPriorAttempt && wpm > prevEntry.bestWpm;
 
     if (stars === 3) threeStarStreak++; else threeStarStreak = 0;
 
     var justTookFirst = false;
     if (rankBefore !== null && rankBefore !== 1){
       try {
-        var profilesAfter = await DataLayer.listProfiles();
-        var rankAfter = rankOf(profilesAfter, currentProfile._id);
+        var boardAfter = await DataLayer.kid.leaderboard(currentProfile.token);
+        var rankAfter = rankOf(boardAfter, currentProfile._id);
         justTookFirst = rankAfter === 1;
       } catch(e){}
     }
@@ -1295,7 +1457,7 @@
 
   async function renderLeaderboard(){
     el.boardRows.innerHTML = '<p style="color:var(--muted);">Loading…</p>';
-    var profiles = await DataLayer.listProfiles();
+    var profiles = await DataLayer.kid.leaderboard(currentProfile.token);
     var rows = profiles.map(function(p){ return Object.assign({ profile: p }, computeBoardStats(p)); });
     var sortKey = boardMetric === "stars" ? "stars" : boardMetric === "wpm" ? "bestWpm" : "passed";
     rows.sort(function(a,b){ return b[sortKey] - a[sortKey]; });
@@ -1348,72 +1510,50 @@
   }
   renderAvatarPick();
 
-  el.parentPortalBtn.addEventListener("click", async function(){
-    var cfg = await DataLayer.getAdminConfig();
+  function openParentPortalFlow(){
     el.parentGateError.textContent = "";
     el.parentGateInput.value = "";
-    el.parentGateConfirm.value = "";
-    if (!cfg || !cfg.pin){
-      el.parentGateTitle.textContent = "Set up your parent PIN";
-      el.parentGateHint.textContent = "This is the first time — choose a PIN (4+ digits) you'll use to open the Parent Portal.";
-      el.parentGateConfirm.hidden = false;
-      el.parentGateBackdrop.dataset.mode = "bootstrap";
-    } else {
-      el.parentGateTitle.textContent = "Parent PIN";
-      el.parentGateHint.textContent = "Enter your parent PIN to continue.";
-      el.parentGateConfirm.hidden = true;
-      el.parentGateBackdrop.dataset.mode = "login";
-    }
     el.parentGateBackdrop.hidden = false;
     el.parentGateInput.focus();
-  });
+  }
+  el.parentPortalBtn.addEventListener("click", openParentPortalFlow);
   el.parentGateCancel.addEventListener("click", function(){ el.parentGateBackdrop.hidden = true; });
 
   async function submitParentGate(){
-    var mode = el.parentGateBackdrop.dataset.mode;
     var pin = el.parentGateInput.value.trim();
-    if (mode === "bootstrap"){
-      var confirmPin = el.parentGateConfirm.value.trim();
-      if (pin.length < 4){ el.parentGateError.textContent = "Use at least 4 digits."; return; }
-      if (pin !== confirmPin){ el.parentGateError.textContent = "PINs don't match."; return; }
-      await DataLayer.setAdminPin(pin);
-      isParentAuthed = true;
-      el.parentGateBackdrop.hidden = true;
-      openAdminPortal();
-    } else {
-      var cfg = await DataLayer.getAdminConfig();
-      if (!cfg || pin !== String(cfg.pin)){
-        el.parentGateError.textContent = "That's not the right PIN.";
-        return;
-      }
-      isParentAuthed = true;
-      el.parentGateBackdrop.hidden = true;
-      openAdminPortal();
+    if (!currentFamily || pin !== String(currentFamily.admin_pin)){
+      el.parentGateError.textContent = "That's not the right PIN.";
+      return;
     }
+    el.parentGateBackdrop.hidden = true;
+    openAdminPortal();
   }
   el.parentGateSubmit.addEventListener("click", submitParentGate);
-  el.parentGateInput.addEventListener("keydown", function(e){ if (e.key === "Enter" && el.parentGateConfirm.hidden) submitParentGate(); });
+  el.parentGateInput.addEventListener("keydown", function(e){ if (e.key === "Enter") submitParentGate(); });
 
   function openAdminPortal(){
+    el.ownerTabBtn.hidden = !(currentFamily && currentFamily.is_owner);
     showScreen("screen-admin");
     renderKidsList();
   }
-  el.closeAdminBtn.addEventListener("click", function(){ showScreen(lastScreen); if (lastScreen === "screen-kid-login") renderProfileGrid(); });
+  el.closeAdminBtn.addEventListener("click", function(){ showScreen("screen-landing"); });
+  el.parentSignOutBtn.addEventListener("click", function(){ el.switchUserBtn.click(); });
 
   document.querySelectorAll('.admin-tabs .board-tab').forEach(function(tab){
     tab.addEventListener("click", function(){
       document.querySelectorAll('.admin-tabs .board-tab').forEach(function(t){ t.classList.remove("active"); });
       tab.classList.add("active");
-      ["adminKidsPanel","adminProgressPanel","adminSettingsPanel"].forEach(function(p){ document.getElementById(p).hidden = true; });
+      ["adminKidsPanel","adminProgressPanel","adminSettingsPanel","adminOwnerPanel"].forEach(function(p){ document.getElementById(p).hidden = true; });
       if (tab.dataset.tab === "kids"){ document.getElementById("adminKidsPanel").hidden = false; renderKidsList(); }
       if (tab.dataset.tab === "progress"){ document.getElementById("adminProgressPanel").hidden = false; renderAdminProgress(); }
       if (tab.dataset.tab === "settings"){ document.getElementById("adminSettingsPanel").hidden = false; }
+      if (tab.dataset.tab === "owner"){ document.getElementById("adminOwnerPanel").hidden = false; renderInviteCodes(); }
     });
   });
 
   async function renderKidsList(){
     el.kidsList.innerHTML = '<p style="color:var(--muted);">Loading…</p>';
-    var profiles = await DataLayer.listProfiles();
+    var profiles = await DataLayer.parent.listKids(currentFamily.id);
     el.kidsList.innerHTML = "";
     if (!profiles.length){
       el.kidsList.innerHTML = '<p style="color:var(--muted);">No scribes yet — add one below.</p>';
@@ -1423,24 +1563,24 @@
       row.className = "keycap kid-row";
       row.innerHTML =
         '<span class="avatar">' + p.avatar + '</span>' +
-        '<div class="info"><div class="kname"></div><div class="kmeta">PIN: ' + p.pin + ' · ' + totalStars(p) + ' ★</div></div>' +
+        '<div class="info"><div class="kname"></div><div class="kmeta">@' + p.username + ' · ' + totalStars(p) + ' ★</div></div>' +
         '<div class="actions">' +
-          '<button class="btn-secondary" data-act="pin">Change PIN</button>' +
+          '<button class="btn-secondary" data-act="pw">Reset Password</button>' +
           '<button class="btn-danger" data-act="delete">Delete</button>' +
         '</div>';
       row.querySelector(".kname").textContent = p.name;
-      row.querySelector('[data-act="pin"]').addEventListener("click", async function(){
-        var newPin = prompt("New 4-digit PIN for " + p.name + ":", p.pin);
-        if (newPin && /^[0-9]{4,8}$/.test(newPin.trim())){
-          await DataLayer.updateKidPin(p._id, newPin.trim());
-          renderKidsList();
-        } else if (newPin !== null){
-          alert("PIN must be 4-8 digits.");
+      row.querySelector('[data-act="pw"]').addEventListener("click", async function(){
+        var newPw = prompt("New password for " + p.name + ":");
+        if (newPw && newPw.trim().length >= 4){
+          await DataLayer.parent.setKidPassword(p._id, newPw.trim());
+          alert("Password updated.");
+        } else if (newPw !== null){
+          alert("Password must be at least 4 characters.");
         }
       });
       row.querySelector('[data-act="delete"]').addEventListener("click", async function(){
         if (confirm("Delete " + p.name + "'s profile and all their progress? This cannot be undone.")){
-          await DataLayer.deleteProfile(p._id);
+          await DataLayer.parent.deleteKid(p._id);
           renderKidsList();
         }
       });
@@ -1450,17 +1590,19 @@
 
   el.addKidBtn.addEventListener("click", async function(){
     var name = (el.newKidName.value || "").trim();
-    var pin = (el.newKidPin.value || "").trim();
+    var username = (el.newKidUsername.value || "").trim().toLowerCase();
+    var password = (el.newKidPassword.value || "").trim();
     el.addKidError.textContent = "";
     if (!name){ el.addKidError.textContent = "Enter a name."; return; }
-    if (!/^[0-9]{4}$/.test(pin)){ el.addKidError.textContent = "PIN must be exactly 4 digits."; return; }
+    if (!/^[a-z0-9_.]{3,20}$/.test(username)){ el.addKidError.textContent = "Username: 3-20 characters, letters/numbers/._ only."; return; }
+    if (password.length < 4){ el.addKidError.textContent = "Password must be at least 4 characters."; return; }
     el.addKidBtn.disabled = true;
     try {
-      await DataLayer.createProfile(name, selectedAvatar, pin);
-      el.newKidName.value = ""; el.newKidPin.value = "";
+      await DataLayer.parent.createKid(username, password, name, selectedAvatar);
+      el.newKidName.value = ""; el.newKidUsername.value = ""; el.newKidPassword.value = "";
       renderKidsList();
     } catch(e){
-      el.addKidError.textContent = "Something went wrong — try again.";
+      el.addKidError.textContent = (e && e.code === "23505") ? "That username is already taken — try another." : "Something went wrong — try again.";
     } finally {
       el.addKidBtn.disabled = false;
     }
@@ -1468,7 +1610,7 @@
 
   async function renderAdminProgress(){
     el.dashGrid.innerHTML = '<p style="color:var(--muted);">Loading…</p>';
-    var profiles = await DataLayer.listProfiles();
+    var profiles = await DataLayer.parent.listKids(currentFamily.id);
     el.dashGrid.innerHTML = "";
     if (!profiles.length){
       el.dashGrid.innerHTML = '<p style="color:var(--muted);">No scribes yet.</p>';
@@ -1504,17 +1646,73 @@
     var pin = (el.newParentPin.value || "").trim();
     el.parentPinError.textContent = "";
     if (pin.length < 4){ el.parentPinError.textContent = "Use at least 4 digits."; return; }
-    await DataLayer.setAdminPin(pin);
+    await DataLayer.parent.setAdminPin(currentFamily.id, pin);
+    currentFamily.admin_pin = pin;
     el.newParentPin.value = "";
     el.parentPinError.textContent = "Updated!";
     el.parentPinError.style.color = "var(--good)";
   });
 
+  // ---- owner console ----
+  async function renderInviteCodes(){
+    el.inviteList.innerHTML = '<p style="color:var(--muted);">Loading…</p>';
+    try {
+      var codes = await DataLayer.parent.listInviteCodes();
+      el.inviteList.innerHTML = "";
+      if (!codes.length){
+        el.inviteList.innerHTML = '<p style="color:var(--muted);">No codes yet — generate one above.</p>';
+        return;
+      }
+      codes.forEach(function(c){
+        var row = document.createElement("div");
+        row.className = "keycap kid-row";
+        var status = c.used_by ? "Used" : "Unused";
+        row.innerHTML =
+          '<div class="info"><div class="kname mono">' + c.code + '</div>' +
+          '<div class="kmeta">' + status + (c.note ? " · " + c.note : "") + '</div></div>';
+        el.inviteList.appendChild(row);
+      });
+    } catch(e){
+      el.inviteList.innerHTML = '<p style="color:var(--muted);">Couldn\'t load invite codes.</p>';
+    }
+  }
+  el.generateInviteBtn.addEventListener("click", async function(){
+    el.inviteError.textContent = "";
+    el.generateInviteBtn.disabled = true;
+    try {
+      var note = (el.inviteNote.value || "").trim();
+      await DataLayer.parent.generateInviteCode(note || null);
+      el.inviteNote.value = "";
+      renderInviteCodes();
+    } catch(e){
+      el.inviteError.textContent = "Couldn't generate a code — try again.";
+    } finally {
+      el.generateInviteBtn.disabled = false;
+    }
+  });
+
   // =====================================================================
   // BOOT
   // =====================================================================
-  renderProfileGrid();
-  showScreen("screen-kid-login");
+  (async function boot(){
+    var kidToken = null;
+    try { kidToken = localStorage.getItem(KID_TOKEN_KEY); } catch(e){}
+    if (kidToken){
+      try {
+        var kidData = await DataLayer.kid.resume(kidToken);
+        if (kidData){ await enterKidSession(kidData); return; }
+        try { localStorage.removeItem(KID_TOKEN_KEY); } catch(e){}
+      } catch(e){}
+    }
+    try {
+      var session = await DataLayer.parent.getSession();
+      if (session && session.user){
+        var family = await DataLayer.parent.getFamily(session.user.id);
+        if (family){ currentFamily = family; updateParentBadge(); }
+      }
+    } catch(e){}
+    showScreen("screen-landing");
+  })();
 })();
 </script>
 </body>
